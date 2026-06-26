@@ -18,7 +18,7 @@
   },
   "dependencies": {
     "@app/shared": "workspace:*",
-    "@prisma/client": "^5.19.0",
+    "@prisma/client": "^6.0.0",
     "bcryptjs": "^2.4.3",
     "ioredis": "^5.4.0",
     "jose": "^5.8.0",
@@ -32,7 +32,7 @@
     "@types/node": "^22.7.0",
     "@types/react": "^18.3.11",
     "@types/react-dom": "^18.3.1",
-    "prisma": "^5.19.0",
+    "prisma": "^6.0.0",
     "typescript": "^5.5.0"
   }
 }

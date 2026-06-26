@@ -1,7 +1,25 @@
 // ============ 配置 ============
 
-/** API 服务器地址 - 开发环境 */
-export const API_BASE_URL = 'http://localhost:3000'
+/** 生产环境 API 域名 */
+const PROD_API_BASE = 'https://api.hyqingren.com'
+
+/** 获取 API 基础地址：开发环境 → localhost，体验/正式环境 → 生产域名 */
+function getApiBaseUrl(): string {
+  try {
+    const account = wx.getAccountInfoSync?.()
+    const envVersion = account?.miniProgram?.envVersion
+    if (envVersion === 'develop') {
+      //return 'http://localhost:3000'
+      return 'https://api.hyqingren.com'
+    }
+  } catch {
+    // 获取失败（低版本基础库等），安全降级到 localhost
+  }
+  return PROD_API_BASE
+}
+
+/** API 服务器地址 */
+export const API_BASE_URL = getApiBaseUrl()
 
 // ============ 类型 ============
 

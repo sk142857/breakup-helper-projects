@@ -15,7 +15,7 @@ export interface AuthContext {
 export async function authGuard(req: NextRequest): Promise<{ ctx: AuthContext } | { error: Response }> {
   const authHeader = req.headers.get('Authorization')
   if (!authHeader || !authHeader.startsWith('Bearer ')) {
-    return { error: fail(ErrorCode.UNAUTHORIZED) }
+    return { error: fail(ErrorCode.UNAUTHORIZED, undefined, 401) }
   }
 
   const token = authHeader.slice(7)
@@ -24,6 +24,6 @@ export async function authGuard(req: NextRequest): Promise<{ ctx: AuthContext } 
     const payload: JwtPayload = await verifyToken(token)
     return { ctx: { userId: payload.userId, role: payload.role } }
   } catch {
-    return { error: fail(ErrorCode.UNAUTHORIZED, '登录已过期，请重新登录') }
+    return { error: fail(ErrorCode.UNAUTHORIZED, '登录已过期，请重新登录', 401) }
   }
 }
