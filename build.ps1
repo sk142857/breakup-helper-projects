@@ -34,21 +34,9 @@ foreach ($img in $images) {
     docker build -t $fullName -f $img.Dockerfile $ROOT
     if ($LASTEXITCODE -ne 0) { throw "Build failed: $($img.Name)" }
 
-    # 同时打 latest 标签
-    if ($Tag -ne "latest") {
-        $latestName = "$REGISTRY/$NAMESPACE/$($img.Name):latest"
-        docker tag $fullName $latestName
-    }
-
-    # 推送
     Write-Host "Pushing: $fullName" -ForegroundColor Green
     docker push $fullName
     if ($LASTEXITCODE -ne 0) { throw "Push failed: $($img.Name)" }
-
-    if ($Tag -ne "latest") {
-        Write-Host "Pushing: $latestName" -ForegroundColor Green
-        docker push $latestName
-    }
 }
 
 Write-Host "`nDone!" -ForegroundColor Green

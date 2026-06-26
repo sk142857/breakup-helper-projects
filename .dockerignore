@@ -6,6 +6,7 @@ dist
 *.md
 .env
 .env.*
+!.env.production
 docker-compose*.yml
 build.ps1
 dev.ps1
