@@ -37,4 +37,4 @@ COPY --from=builder /app/packages/helper-api-service/.next/static   ./.next/stat
 COPY --from=builder /app/packages/helper-api-service/prisma          ./prisma
 
 EXPOSE 3000
-CMD ["node", "server.js"]
+CMD ["node", "packages/helper-api-service/server.js"]

@@ -36,22 +36,13 @@ mkdir -p /root/docker_home/nginx-server/ssl
 
 # 创建默认 nginx 配置
 cat > /root/docker_home/nginx-server/conf.d/default.conf << 'EOF'
+# Admin 前端（HTTP，无证书）
 server {
     listen 80;
-    server_name api.hyqingren.com;
+    server_name admin.hyqingren.com;
 
-    # Admin 前端
     location / {
-        proxy_pass http://helper-admin-pro:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto $scheme;
-    }
-
-    # API 服务
-    location /api/ {
-        proxy_pass http://helper-api-service:3000;
+        proxy_pass http://helper-admin-pro:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -59,8 +50,10 @@ server {
     }
 }
 
+# API 服务（仅 HTTPS）
 server {
-    listen 443 ssl http2;
+    listen 443 ssl;
+    http2 on;
     server_name api.hyqingren.com;
 
     # SSL 证书（请替换为实际路径）
@@ -70,16 +63,6 @@ server {
     ssl_protocols TLSv1.2 TLSv1.3;
     ssl_ciphers HIGH:!aNULL:!MD5;
 
-    # Admin 前端
-    location / {
-        proxy_pass http://helper-admin-pro:80;
-        proxy_set_header Host $host;
-        proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto https;
-    }
-
-    # API 服务
     location /api/ {
         proxy_pass http://helper-api-service:3000;
         proxy_set_header Host $host;
@@ -120,6 +103,5 @@ docker run -d \
 ├── helper-api-service/     # deploy.ps1 自动管理
 │   ├── logs/
 │   └── data/
-└── helper-admin-pro/       # deploy.ps1 自动管理
-    └── logs/
+
 ```
