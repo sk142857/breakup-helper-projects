@@ -17,7 +17,7 @@ docker run -d \
   --network hongyan-net \
   --restart unless-stopped \
   -v /docker_home/helper-redis/data:/data \
-  redis:7-alpine \
+  registry.cn-hangzhou.aliyuncs.com/hongyan-service/redis:7-alpine \
   redis-server --appendonly yes
 ```
 
@@ -61,7 +61,7 @@ docker run -d \
   -v /docker_home/nginx-server/conf.d:/etc/nginx/conf.d \
   -v /docker_home/nginx-server/logs:/var/log/nginx \
   -v /docker_home/nginx-server/html:/usr/share/nginx/html \
-  nginx:alpine
+  registry.cn-hangzhou.aliyuncs.com/hongyan-service/nginx:alpine
 ```
 
 ---
