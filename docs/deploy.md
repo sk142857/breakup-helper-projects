@@ -36,12 +36,48 @@ mkdir -p /root/docker_home/nginx-server/ssl
 
 # 创建默认 nginx 配置
 cat > /root/docker_home/nginx-server/conf.d/default.conf << 'EOF'
+# 限流区域（谨慎策略：10r/s，突发=20，无延迟）
+limit_req_zone $binary_remote_addr zone=admin_limit:10m rate=10r/s;
+limit_req_zone $binary_remote_addr zone=api_limit:10m rate=10r/s;
+
 # Admin 前端（HTTP，无证书）
 server {
     listen 80;
     server_name admin.hyqingren.com;
 
+    # 基础防御
+    server_tokens off;
+    client_max_body_size 10m;
+    client_body_buffer_size 128k;
+    large_client_header_buffers 4 16k;
+
+    # 限制请求方法
+    if ($request_method !~ ^(GET|HEAD|POST)$) {
+        return 405;
+    }
+
+    # gzip 压缩
+    gzip on;
+    gzip_vary on;
+    gzip_proxied any;
+    gzip_comp_level 6;
+    gzip_min_length 256;
+    gzip_types
+        text/plain
+        text/css
+        text/xml
+        text/javascript
+        application/javascript
+        application/json
+        application/xml
+        application/x-javascript
+        image/svg+xml
+        application/vnd.ms-fontobject
+        application/x-font-ttf
+        font/opentype;
+
     location / {
+        limit_req zone=admin_limit burst=20 nodelay;
         proxy_pass http://helper-admin-pro:8080;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
@@ -56,6 +92,24 @@ server {
     http2 on;
     server_name api.hyqingren.com;
 
+    # 基础防御
+    server_tokens off;
+    client_max_body_size 10m;
+    client_body_buffer_size 128k;
+    large_client_header_buffers 4 16k;
+
+    # 限制请求方法
+    if ($request_method !~ ^(GET|HEAD|POST|PUT|DELETE|PATCH)$) {
+        return 405;
+    }
+
+    # 安全响应头
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options "DENY" always;
+    add_header X-XSS-Protection "1; mode=block" always;
+    add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+    add_header Permissions-Policy "camera=(), microphone=(), geolocation=()" always;
+
     # SSL 证书（请替换为实际路径）
     ssl_certificate     /etc/nginx/ssl/api.hyqingren.com.pem;
     ssl_certificate_key /etc/nginx/ssl/api.hyqingren.com.key;
@@ -64,6 +118,7 @@ server {
     ssl_ciphers HIGH:!aNULL:!MD5;
 
     location /api/ {
+        limit_req zone=api_limit burst=20 nodelay;
         proxy_pass http://helper-api-service:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
