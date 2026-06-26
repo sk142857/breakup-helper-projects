@@ -12,13 +12,13 @@ export default function Users() {
   const columns: ProColumns<User>[] = [
     {
       title: 'ID',
-      dataIndex: 'id',
+      dataIndex: 'userId',
       width: 80,
       search: false,
     },
     {
       title: '姓名',
-      dataIndex: 'name',
+      dataIndex: 'nickname',
       width: 120,
     },
     {
@@ -28,10 +28,10 @@ export default function Users() {
     },
     {
       title: '状态',
-      dataIndex: 'status',
+      dataIndex: 'userStatus',
       width: 100,
       render: (_, record) =>
-        record.status === 'active' ? (
+        record.userStatus === 'active' ? (
           <Tag color="green">启用</Tag>
         ) : (
           <Tag color="red">禁用</Tag>

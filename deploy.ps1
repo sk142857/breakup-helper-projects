@@ -8,26 +8,28 @@
 # 使用方式：
 #   .\deploy.ps1                    → 启动/更新全部服务
 #   .\deploy.ps1 -Tag v1.0.0        → 指定版本
-#   .\deploy.ps1 -SkipRedis          → 跳过 Redis（使用外部 Redis）
 #   .\deploy.ps1 -Down               → 停止并删除全部容器
 #   .\deploy.ps1 -Restart            → 重启全部容器
 # ============================================
 
 param(
     [string]$Tag = "1.0",
-    [switch]$SkipRedis,
     [switch]$Down,
     [switch]$Restart
 )
 
 $ErrorActionPreference = "Stop"
 $REGISTRY    = "registry.cn-hangzhou.aliyuncs.com"
-$NAMESPACE   = "breakup-helper"
+$NAMESPACE   = "hongyan-service"
 $NETWORK     = "breakup-net"
+$DOCKER_HOME = "/docker_home"
 
 $IMAGE_API   = "$REGISTRY/$NAMESPACE/helper-api-service:$Tag"
 $IMAGE_ADMIN = "$REGISTRY/$NAMESPACE/helper-admin-pro:$Tag"
-$IMAGE_REDIS = "redis:7-alpine"
+
+# 宿主机挂载目录（按项目名创建二级目录）
+$HOME_API   = "$DOCKER_HOME/helper-api-service"
+$HOME_ADMIN = "$DOCKER_HOME/helper-admin-pro"
 
 # ============================================
 # 停止 & 清理
@@ -47,7 +49,7 @@ if ($Down) {
 if ($Restart) {
     Write-Host "Restarting all containers..." -ForegroundColor Yellow
     docker restart helper-api-service helper-admin-pro 2>$null
-    if (-not $SkipRedis) { docker restart helper-redis 2>$null }
+    docker restart helper-redis 2>$null
     Write-Host "Done." -ForegroundColor Green
     exit 0
 }
@@ -68,22 +70,18 @@ Write-Host "Pulling images..." -ForegroundColor Cyan
 docker pull $IMAGE_API
 docker pull $IMAGE_ADMIN
 
-# 3. Redis（可选）
-if (-not $SkipRedis) {
-    $redisRunning = docker ps --filter "name=helper-redis" -q
-    if (-not $redisRunning) {
-        Write-Host "Starting Redis..." -ForegroundColor Cyan
-        docker rm helper-redis 2>$null
-        docker run -d `
-            --name helper-redis `
-            --network $NETWORK `
-            --restart unless-stopped `
-            -v redis_data:/data `
-            $IMAGE_REDIS redis-server --appendonly yes
-    } else {
-        Write-Host "Redis already running, skip." -ForegroundColor Yellow
-    }
+# 2.5. 创建宿主机挂载目录
+Write-Host "Creating host directories..." -ForegroundColor Cyan
+New-Item -ItemType Directory -Force -Path "$HOME_API/logs", "$HOME_API/data" | Out-Null
+New-Item -ItemType Directory -Force -Path "$HOME_ADMIN/logs" | Out-Null
+
+# 3. 前置检查：Redis 必须已存在
+$redisExists = docker ps -a --filter "name=helper-redis" --format "{{.Names}}" | Select-String "helper-redis"
+if (-not $redisExists) {
+    Write-Host "[ERROR] Redis 容器 'helper-redis' 不存在，请先手动创建！" -ForegroundColor Red
+    exit 1
 }
+Write-Host "Redis container exists, OK." -ForegroundColor Green
 
 # 4. API 服务
 Write-Host "Starting helper-api-service..." -ForegroundColor Cyan
@@ -94,6 +92,8 @@ docker run -d `
     --network $NETWORK `
     --restart unless-stopped `
     -p 3000:3000 `
+    -v ${HOME_API}/logs:/app/logs `
+    -v ${HOME_API}/data:/app/data `
     $IMAGE_API
 
 # 5. Admin 前端
@@ -105,6 +105,7 @@ docker run -d `
     --network $NETWORK `
     --restart unless-stopped `
     -p 80:80 `
+    -v ${HOME_ADMIN}/logs:/var/log/nginx `
     $IMAGE_ADMIN
 
 # ============================================
