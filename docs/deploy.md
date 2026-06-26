@@ -9,12 +9,12 @@
 mkdir -p /docker_home/helper-redis/data
 
 # 创建网络（如果不存在）
-docker network create breakup-net 2>/dev/null || true
+docker network create hongyan-net 2>/dev/null || true
 
 # 启动 Redis
 docker run -d \
   --name helper-redis \
-  --network breakup-net \
+  --network hongyan-net \
   --restart unless-stopped \
   -v /docker_home/helper-redis/data:/data \
   redis:7-alpine \
@@ -54,7 +54,7 @@ EOF
 # 启动 Nginx
 docker run -d \
   --name nginx-server \
-  --network breakup-net \
+  --network hongyan-net \
   --restart unless-stopped \
   -p 80:80 \
   -p 443:443 \

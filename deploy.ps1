@@ -21,7 +21,7 @@ param(
 $ErrorActionPreference = "Stop"
 $REGISTRY    = "registry.cn-hangzhou.aliyuncs.com"
 $NAMESPACE   = "hongyan-service"
-$NETWORK     = "breakup-net"
+$NETWORK     = "hongyan-net"
 $DOCKER_HOME = "/docker_home"
 
 $IMAGE_API   = "$REGISTRY/$NAMESPACE/helper-api-service:$Tag"
