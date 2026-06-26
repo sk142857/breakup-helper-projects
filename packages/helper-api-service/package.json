@@ -1,5 +1,5 @@
 {
-  "name": "@app/server",
+  "name": "@app/helper-api-service",
   "version": "0.0.1",
   "private": true,
   "type": "module",

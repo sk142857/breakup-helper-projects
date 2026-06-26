@@ -1,0 +1,11 @@
+node_modules
+.next
+dist
+.git
+.gitignore
+*.md
+.env
+.env.*
+docker-compose*.yml
+build.ps1
+dev.ps1

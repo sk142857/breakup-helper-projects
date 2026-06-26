@@ -9,12 +9,14 @@
  * - 支持自定义事件
  */
 import { API_BASE_URL } from './request'
+import { EventType, EventName } from './eventEnum'
+import type { EventTypeValue, EventNameValue } from './eventEnum'
 
 // ============ 类型 ============
 
 interface TrackEvent {
-  eventType: string
-  eventName?: string
+  eventType: EventTypeValue | string
+  eventName?: EventNameValue | string
   pagePath?: string
   pageTitle?: string
   pageQuery?: string
@@ -74,6 +76,15 @@ function getDeviceSnapshot(): DeviceSnapshot {
   return device
 }
 
+// ============ 页面标题映射 ============ //
+
+const pageTitleMap: Record<string, string> = {}
+
+/** 注册页面标题映射，建议在 app.ts 中调用 */
+export function registerPageTitles(titles: Record<string, string>): void {
+  Object.assign(pageTitleMap, titles)
+}
+
 // ============ 事件队列 ============
 
 const MAX_QUEUE = 50
@@ -123,6 +134,11 @@ function flush(): void {
 }
 
 function enqueue(event: TrackEvent): void {
+  // 自动填充 pageTitle
+  if (!event.pageTitle && event.pagePath) {
+    event.pageTitle = pageTitleMap[event.pagePath] || ''
+  }
+
   queue.push(event)
   if (queue.length >= MAX_QUEUE) {
     queue = queue.slice(-MAX_QUEUE)
@@ -148,8 +164,8 @@ function enqueue(event: TrackEvent): void {
  * eventTracker.track('tap', 'btn_submit', { pagePath: 'pages/index/index', extra: { formId: 1 } })
  */
 export function track(
-  eventType: string,
-  eventName?: string,
+  eventType: EventTypeValue | string,
+  eventName?: EventNameValue | string,
   opts?: { pagePath?: string; pageTitle?: string; pageQuery?: string; extra?: Record<string, unknown> },
 ): void {
   enqueue({
@@ -182,8 +198,8 @@ function pageEnter(path: string): void {
     // 离开上一页，记录停留时长
     const duration = currentPageEnterTime ? Date.now() - currentPageEnterTime : 0
     enqueue({
-      eventType: 'page',
-      eventName: 'page_leave',
+      eventType: EventType.PAGE,
+      eventName: EventName.PAGE_LEAVE,
       pagePath: currentPagePath,
       duration: Math.round(duration),
     })
@@ -191,8 +207,8 @@ function pageEnter(path: string): void {
   currentPagePath = path
   currentPageEnterTime = Date.now()
   enqueue({
-    eventType: 'page',
-    eventName: 'page_enter',
+    eventType: EventType.PAGE,
+    eventName: EventName.PAGE_ENTER,
     pagePath: path,
   })
 }
@@ -210,8 +226,8 @@ const _Component = Component
   const _onLoad = options.onLoad
   options.onLoad = function (this: WechatMiniprogram.Page.Instance<Record<string, unknown>, Record<string, unknown>>, query: Record<string, string>) {
     enqueue({
-      eventType: 'lifecycle',
-      eventName: 'page_load',
+      eventType: EventType.LIFECYCLE,
+      eventName: EventName.PAGE_LOAD,
       pagePath: route,
       pageQuery: JSON.stringify(query),
     })
@@ -223,8 +239,8 @@ const _Component = Component
   options.onShow = function (this: WechatMiniprogram.Page.Instance<Record<string, unknown>, Record<string, unknown>>) {
     pageEnter(route)
     enqueue({
-      eventType: 'lifecycle',
-      eventName: 'page_show',
+      eventType: EventType.LIFECYCLE,
+      eventName: EventName.PAGE_SHOW,
       pagePath: route,
     })
     if (_onShow) _onShow.call(this)
@@ -235,8 +251,8 @@ const _Component = Component
   options.onHide = function (this: WechatMiniprogram.Page.Instance<Record<string, unknown>, Record<string, unknown>>) {
     const duration = currentPageEnterTime ? Date.now() - currentPageEnterTime : 0
     enqueue({
-      eventType: 'lifecycle',
-      eventName: 'page_hide',
+      eventType: EventType.LIFECYCLE,
+      eventName: EventName.PAGE_HIDE,
       pagePath: route,
       duration: Math.round(duration),
     })
@@ -247,8 +263,8 @@ const _Component = Component
   const _onUnload = options.onUnload
   options.onUnload = function (this: WechatMiniprogram.Page.Instance<Record<string, unknown>, Record<string, unknown>>) {
     enqueue({
-      eventType: 'lifecycle',
-      eventName: 'page_unload',
+      eventType: EventType.LIFECYCLE,
+      eventName: EventName.PAGE_UNLOAD,
       pagePath: route,
     })
     if (_onUnload) _onUnload.call(this)
@@ -258,8 +274,8 @@ const _Component = Component
   const _onShare = options.onShareAppMessage
   options.onShareAppMessage = function (this: WechatMiniprogram.Page.Instance<Record<string, unknown>, Record<string, unknown>>, opts: WechatMiniprogram.Page.IShareAppMessageOption) {
     enqueue({
-      eventType: 'share',
-      eventName: 'share_app_message',
+      eventType: EventType.SHARE,
+      eventName: EventName.SHARE_APP_MESSAGE,
       pagePath: route,
       extra: { from: opts.from, target: opts.target?.id },
     })
@@ -287,10 +303,10 @@ const _Component = Component
     }
   }
 
-  wrapMethod('onLoad', 'lifecycle', 'page_load')
-  wrapMethod('onShow', 'lifecycle', 'page_show')
-  wrapMethod('onHide', 'lifecycle', 'page_hide')
-  wrapMethod('onUnload', 'lifecycle', 'page_unload')
+  wrapMethod('onLoad', EventType.LIFECYCLE, EventName.PAGE_LOAD)
+  wrapMethod('onShow', EventType.LIFECYCLE, EventName.PAGE_SHOW)
+  wrapMethod('onHide', EventType.LIFECYCLE, EventName.PAGE_HIDE)
+  wrapMethod('onUnload', EventType.LIFECYCLE, EventName.PAGE_UNLOAD)
 
   o.methods = methods
   return _Component(options)
@@ -304,10 +320,10 @@ const _switchTab = wx.switchTab
 const _navigateBack = wx.navigateBack
 const _reLaunch = wx.reLaunch
 
-function navEvent(type: string, url: string): void {
+function navEvent(name: EventNameValue, url: string): void {
   enqueue({
-    eventType: 'navigation',
-    eventName: type,
+    eventType: EventType.NAVIGATION,
+    eventName: name,
     pagePath: url.split('?')[0],
     pageQuery: url.includes('?') ? url.split('?')[1] : '',
     referrerPath: currentPagePath,
@@ -315,25 +331,25 @@ function navEvent(type: string, url: string): void {
 }
 
 wx.navigateTo = function (opts) {
-  navEvent('navigate_to', opts.url)
+  navEvent(EventName.NAVIGATE_TO, opts.url)
   return _navigateTo.call(wx, opts)
 }
 wx.redirectTo = function (opts) {
-  navEvent('redirect_to', opts.url)
+  navEvent(EventName.REDIRECT_TO, opts.url)
   return _redirectTo.call(wx, opts)
 }
 wx.switchTab = function (opts) {
-  navEvent('switch_tab', opts.url)
+  navEvent(EventName.SWITCH_TAB, opts.url)
   return _switchTab.call(wx, opts)
 }
 wx.reLaunch = function (opts) {
-  navEvent('re_launch', opts.url)
+  navEvent(EventName.RE_LAUNCH, opts.url)
   return _reLaunch.call(wx, opts)
 }
 wx.navigateBack = function (opts) {
   enqueue({
-    eventType: 'navigation',
-    eventName: 'navigate_back',
+    eventType: EventType.NAVIGATION,
+    eventName: EventName.NAVIGATE_BACK,
     referrerPath: currentPagePath,
     extra: opts ? { delta: opts.delta } : undefined,
   })
