@@ -22,7 +22,7 @@ $ErrorActionPreference = "Stop"
 $REGISTRY    = "registry.cn-hangzhou.aliyuncs.com"
 $NAMESPACE   = "hongyan-service"
 $NETWORK     = "hongyan-net"
-$DOCKER_HOME = "/docker_home"
+$DOCKER_HOME = "/root/docker_home"
 
 $IMAGE_API   = "$REGISTRY/$NAMESPACE/helper-api-service:$Tag"
 $IMAGE_ADMIN = "$REGISTRY/$NAMESPACE/helper-admin-pro:$Tag"

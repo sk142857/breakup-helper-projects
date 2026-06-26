@@ -1,12 +1,12 @@
 # 基础服务部署文档
 
-> 前置条件：服务器已安装 Docker，创建 `/docker_home` 根目录。
+> 前置条件：服务器已安装 Docker，创建 `/root/docker_home/` 根目录。
 
 ## 1. Redis
 
 ```bash
 # 创建挂载目录
-mkdir -p /docker_home/helper-redis/data
+mkdir -p /root/docker_home/helper-redis/data
 
 # 创建网络（如果不存在）
 docker network create hongyan-net 2>/dev/null || true
@@ -16,7 +16,7 @@ docker run -d \
   --name helper-redis \
   --network hongyan-net \
   --restart unless-stopped \
-  -v /docker_home/helper-redis/data:/data \
+  -v /root/docker_home/helper-redis/data:/data \
   registry.cn-hangzhou.aliyuncs.com/hongyan-service/redis:7-alpine \
   redis-server --appendonly yes
 ```
@@ -25,17 +25,17 @@ docker run -d \
 
 ```bash
 # 创建挂载目录
-mkdir -p /docker_home/nginx-server/conf.d
-mkdir -p /docker_home/nginx-server/logs
-mkdir -p /docker_home/nginx-server/html
-mkdir -p /docker_home/nginx-server/ssl
+mkdir -p /root/docker_home/nginx-server/conf.d
+mkdir -p /root/docker_home/nginx-server/logs
+mkdir -p /root/docker_home/nginx-server/html
+mkdir -p /root/docker_home/nginx-server/ssl
 
 # 上传 SSL 证书到该目录（阿里云免费证书或 Let's Encrypt）
-# /docker_home/nginx-server/ssl/api.hyqingren.com.pem
-# /docker_home/nginx-server/ssl/api.hyqingren.com.key
+# /root/docker_home/nginx-server/ssl/api.hyqingren.com.pem
+# /root/docker_home/nginx-server/ssl/api.hyqingren.com.key
 
 # 创建默认 nginx 配置
-cat > /docker_home/nginx-server/conf.d/default.conf << 'EOF'
+cat > /root/docker_home/nginx-server/conf.d/default.conf << 'EOF'
 server {
     listen 80;
     server_name api.hyqingren.com;
@@ -97,10 +97,10 @@ docker run -d \
   --restart unless-stopped \
   -p 80:80 \
   -p 443:443 \
-  -v /docker_home/nginx-server/conf.d:/etc/nginx/conf.d \
-  -v /docker_home/nginx-server/logs:/var/log/nginx \
-  -v /docker_home/nginx-server/html:/usr/share/nginx/html \
-  -v /docker_home/nginx-server/ssl:/etc/nginx/ssl \
+  -v /root/docker_home/nginx-server/conf.d:/etc/nginx/conf.d \
+  -v /root/docker_home/nginx-server/logs:/var/log/nginx \
+  -v /root/docker_home/nginx-server/html:/usr/share/nginx/html \
+  -v /root/docker_home/nginx-server/ssl:/etc/nginx/ssl \
   registry.cn-hangzhou.aliyuncs.com/hongyan-service/nginx:alpine
 ```
 
@@ -109,7 +109,7 @@ docker run -d \
 ## 目录结构总览
 
 ```
-/docker_home/
+/root/docker_home/
 ├── helper-redis/
 │   └── data/              # Redis 持久化数据
 ├── nginx-server/
