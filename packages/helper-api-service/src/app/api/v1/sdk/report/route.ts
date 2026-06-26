@@ -30,7 +30,7 @@ function now(): Date {
 export async function POST(req: NextRequest) {
   // ---- 鉴权 ----
   const auth = await authGuard(req)
-  if (auth.error) return auth.error
+  if ('error' in auth) return auth.error
   const { userId } = auth.ctx
 
   // ---- 解析 ----
@@ -55,7 +55,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkDeviceInfo.create({
           data: {
-            infoId: deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             abi: di.abi, deviceAbi: di.deviceAbi,
             benchmarkLevel: di.benchmarkLevel, modelLevel: di.modelLevel,
             brand: di.brand, model: di.model, systemName: di.systemName,
@@ -71,7 +71,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkAppBaseInfo.create({
           data: {
-            infoId: randomId16(), deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: randomId16(), deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             sdkVersion: ai.sdkVersion, enableDebug: ai.enableDebug,
             hostAppId: ai.hostAppId, language: ai.language,
             version: ai.version, theme: ai.theme,
@@ -88,7 +88,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkBatteryInfo.create({
           data: {
-            infoId: randomId16(), deviceInfoId, userId: BigInt(userId), md5Str: md5, openId,
+            infoId: randomId16(), deviceInfoId, userId: BigInt(userId), md5Str: md5, openId: openId!,
             batteryLevel: bi.batteryLevel, isCharging: bi.isCharging,
             isLowPowerModeEnabled: bi.isLowPowerModeEnabled,
           },
@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkWindowInfo.create({
           data: {
-            infoId: randomId16(), deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: randomId16(), deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             pixelRatio: wi.pixelRatio, screenWidth: wi.screenWidth,
             screenHeight: wi.screenHeight, windowWidth: wi.windowWidth,
             windowHeight: wi.windowHeight, statusBarHeight: wi.statusBarHeight,
@@ -118,7 +118,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkNetworkType.create({
           data: {
-            infoId: randomId16(), deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: randomId16(), deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             networkType: ni.networkType, signalStrength: ni.signalStrength,
             hasSystemProxy: ni.hasSystemProxy ? 1 : 0,
             weakNet: ni.weakNet ? 1 : 0,
@@ -133,7 +133,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkSystemSetting.create({
           data: {
-            infoId: randomId16(), deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: randomId16(), deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             bluetoothEnabled: ss.bluetoothEnabled,
             locationEnabled: ss.locationEnabled,
             wifiEnabled: ss.wifiEnabled,
@@ -149,7 +149,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkSkylineInfo.create({
           data: {
-            infoId: randomId16(), deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: randomId16(), deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             isSupported: si.isSupported, version: si.version,
             appVersion: si.appVersion, reason: si.reason,
           },
@@ -163,7 +163,7 @@ export async function POST(req: NextRequest) {
       writes.push(
         prisma.sdkLaunchOptions.create({
           data: {
-            infoId: randomId16(), deviceInfoId, openId, userId: BigInt(userId), md5Str: md5,
+            infoId: randomId16(), deviceInfoId, openId: openId!, userId: BigInt(userId), md5Str: md5,
             path: lo.path, scene: lo.scene, appId: lo.appId,
             queryObj: lo.queryObj ?? undefined,
             shareTicket: lo.shareTicket,

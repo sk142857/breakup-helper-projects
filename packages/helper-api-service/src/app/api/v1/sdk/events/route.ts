@@ -85,7 +85,7 @@ export async function POST(req: NextRequest) {
           data: {
             logId: snowflakeId(),
             timestamp: ts,
-            userId: userId ?? undefined,
+            userId: userId ?? BigInt(0),
             openId,
             deviceInfoId,
             eventType: ev.eventType,
@@ -104,14 +104,14 @@ export async function POST(req: NextRequest) {
             appVersion: ev.appVersion,
             wxVersion: ev.wxVersion,
             networkType: ev.networkType,
-            extra: ev.extra ?? undefined,
+            extra: ev.extra as any,
           },
-        }).catch(e => console.error('[SDK-Events] 写入失败:', e)),
+        }).catch((e: unknown) => console.error('[SDK-Events] 写入失败:', e)),
       )
     }
 
     // 异步写入，不阻塞
-    Promise.all(writes).catch(e => console.error('[SDK-Events] 批量写入异常:', e))
+    Promise.all(writes).catch((e: unknown) => console.error('[SDK-Events] 批量写入异常:', e))
 
     return ok({ accepted: body.events.length })
   } catch (e) {

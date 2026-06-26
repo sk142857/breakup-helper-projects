@@ -94,11 +94,6 @@ docker run -d `
     --network $NETWORK `
     --restart unless-stopped `
     -p 3000:3000 `
-    -e DATABASE_URL="mysql://root:123456@host.docker.internal:3306/aliyun_breakup_helper" `
-    -e JWT_SECRET="change-me-to-a-random-string-at-least-32-chars" `
-    -e JWT_EXPIRES_IN="7200" `
-    -e SIGNATURE_TTL="300" `
-    -e REDIS_URL="redis://helper-redis:6379" `
     $IMAGE_API
 
 # 5. Admin 前端
@@ -117,7 +112,3 @@ Write-Host ""
 Write-Host "Deploy complete!" -ForegroundColor Green
 Write-Host "  API:    http://<server>:3000" -ForegroundColor Cyan
 Write-Host "  Admin:  http://<server>:80" -ForegroundColor Cyan
-Write-Host ""
-Write-Host "IMPORTANT: 修改环境变量后请重新执行 .\deploy.ps1" -ForegroundColor Yellow
-Write-Host "  编辑 deploy.ps1 中 -e 参数来修改 DATABASE_URL / JWT_SECRET 等" -ForegroundColor Yellow
-Write-Host "  或改用 .env 文件：docker run ... --env-file .env.production ..." -ForegroundColor Yellow
