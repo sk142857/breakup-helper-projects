@@ -1,0 +1,26 @@
+{
+  "name": "breakup-helper",
+  "private": true,
+  "scripts": {
+    "env:dev": "pnpm --filter @app/server env:dev",
+    "env:prod": "pnpm --filter @app/server env:prod",
+    "dev": "concurrently -k -n server,admin -c cyan,green \"pnpm dev:server\" \"pnpm dev:admin\"",
+    "dev:server": "pnpm --filter @app/server dev",
+    "dev:admin": "pnpm --filter @app/admin dev",
+    "dev:miniapp": "pnpm --filter @app/miniapp dev",
+    "build:server": "pnpm --filter @app/server build",
+    "build:admin": "pnpm --filter @app/admin build",
+    "db:push": "pnpm --filter @app/server db:push",
+    "db:studio": "pnpm --filter @app/server db:studio",
+    "db:generate": "pnpm --filter @app/server db:generate",
+    "lint": "pnpm -r lint",
+    "clean": "pnpm -r clean"
+  },
+  "engines": {
+    "node": ">=20",
+    "pnpm": ">=9"
+  },
+  "dependencies": {
+    "concurrently": "^10.0.3"
+  }
+}

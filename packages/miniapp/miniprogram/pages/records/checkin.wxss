@@ -1,0 +1,145 @@
+/* Skyline 页面滚动布局 */
+page { overflow: hidden; }
+
+/* 断联打卡页样式 */
+
+.checkin-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 48rpx var(--spacing-h) 32rpx;
+}
+.checkin-avatar {
+  margin-bottom: 20rpx;
+}
+.avatar-lg {
+  width: 120rpx;
+  height: 120rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-green { background: linear-gradient(135deg, #34C759, #30D158); }
+
+.checkin-name {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+}
+.checkin-sub {
+  font-size: 26rpx;
+  color: var(--text-hint);
+}
+
+/* 进度环 */
+.checkin-progress {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 0 40rpx;
+}
+.progress-circle {
+  width: 200rpx;
+  height: 200rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #f6685d, #f9a098);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20rpx;
+  box-shadow: 0 8rpx 30rpx rgba(246,104,93,0.3);
+}
+.circle-bg {
+  width: 172rpx;
+  height: 172rpx;
+  border-radius: 50%;
+  background: #FFFFFF;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.circle-day {
+  font-size: 64rpx;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.circle-label {
+  font-size: 24rpx;
+  color: var(--text-hint);
+  margin-top: 4rpx;
+}
+.progress-tag {
+  margin-top: 8rpx;
+}
+
+/* 打卡分区 */
+.checkin-section {
+  padding: 0 var(--spacing-h) 32rpx;
+}
+.checkin-section-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 20rpx;
+  display: block;
+}
+
+/* 心情选项（统一卡片模式） */
+.option-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.option-grid-2 .option-card {
+  width: calc((100% - 16rpx) / 2);
+}
+.option-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 16rpx;
+  border-radius: 16rpx;
+  background: var(--bg);
+  border: 3rpx solid transparent;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+.option-card.option-active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+.option-emoji {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
+}
+.option-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 文本域 */
+.form-textarea-wrap {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 8rpx;
+  border: 1rpx solid var(--border);
+}
+
+/* 底部打卡按钮 */
+.checkin-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx var(--spacing-h) calc(24rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--bg) 30%);
+}
+.btn-full {
+  width: 100% !important;
+}

@@ -1,0 +1,97 @@
+<!-- 首页仪表盘 -->
+<t-navbar title="断联计划" fixed placeholder></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
+  <view class="page-container">
+
+    <!-- 数据概览卡片 -->
+    <view class="stats-card">
+      <view class="stats-bg"></view>
+      <view class="stats-content">
+        <view class="stats-main">
+          <text class="stats-number">127</text>
+          <text class="stats-unit">天</text>
+        </view>
+        <text class="stats-label">累计断联时长</text>
+        <view class="stats-row">
+          <view class="stats-item">
+            <text class="stats-value">2</text>
+            <text class="stats-desc">进行中</text>
+          </view>
+          <view class="stats-divider"></view>
+          <view class="stats-item">
+            <text class="stats-value">1</text>
+            <text class="stats-desc">已结束</text>
+          </view>
+          <view class="stats-divider"></view>
+          <view class="stats-item">
+            <text class="stats-value">15</text>
+            <text class="stats-desc">总记录</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 进行中的断联 -->
+    <view class="section-header flex-between">
+      <text class="section-title">进行中的断联</text>
+    </view>
+
+    <!-- 感情卡片 1 -->
+    <view class="relation-card" data-id="1" bindtap="onTapCard">
+      <view class="card-header flex-between">
+        <view class="flex-row">
+          <view class="avatar avatar-green">
+            <t-icon name="user" size="48rpx" color="#fff" />
+          </view>
+          <view class="card-header-info">
+            <text class="card-title">张三</text>
+            <text class="card-subtitle">初恋 · 在一起 2 年</text>
+          </view>
+        </view>
+        <view class="tag tag-warning">进行中</view>
+      </view>
+      <view class="card-body">
+        <view class="flex-between mb-16">
+          <text class="text-secondary">已断联 89 天</text>
+          <text class="text-hint">最近记录：3天前</text>
+        </view>
+        <view class="progress-wrap">
+          <t-progress percentage="{{89}}" stroke-width="12rpx" color="#f6685d" track-color="#fde8e5" />
+          <text class="progress-hint">目标 100 天 · 还剩 11 天</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 感情卡片 2 -->
+    <view class="relation-card" data-id="2" bindtap="onTapCard">
+      <view class="card-header flex-between">
+        <view class="flex-row">
+          <view class="avatar avatar-blue">
+            <t-icon name="user" size="48rpx" color="#fff" />
+          </view>
+          <view class="card-header-info">
+            <text class="card-title">李四</text>
+            <text class="card-subtitle">前任 · 在一起 1 年</text>
+          </view>
+        </view>
+        <view class="tag tag-warning">进行中</view>
+      </view>
+      <view class="card-body">
+        <view class="flex-between mb-16">
+          <text class="text-secondary">已断联 38 天</text>
+          <text class="text-hint">最近记录：1天前</text>
+        </view>
+        <view class="progress-wrap">
+          <t-progress percentage="{{38}}" stroke-width="12rpx" color="#5B8DEF" track-color="#E8F0FE" />
+          <text class="progress-hint">目标 100 天 · 还剩 62 天</text>
+        </view>
+      </view>
+    </view>
+
+  </view>
+</scroll-view>
+
+<!-- 悬浮新增按钮（置于 scroll-view 外以保持 fixed 定位） -->
+<view class="fab-btn" bindtap="onAddRelationship">
+  <t-icon name="add" size="48rpx" color="#fff" />
+</view>

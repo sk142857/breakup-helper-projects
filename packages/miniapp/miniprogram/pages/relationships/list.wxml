@@ -1,0 +1,113 @@
+<!-- 感情列表页 -->
+<t-navbar title="我的感情" fixed placeholder></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
+  <view class="page-container">
+
+    <!-- 分类标签 -->
+    <view class="filter-bar">
+      <view class="filter-item {{filterTab === 'all' ? 'filter-active' : ''}}" data-tab="all" bindtap="onFilter">
+        <text>全部</text>
+      </view>
+      <view class="filter-item {{filterTab === 'active' ? 'filter-active' : ''}}" data-tab="active" bindtap="onFilter">
+        <text>进行中</text>
+        <view class="filter-badge">2</view>
+      </view>
+      <view class="filter-item {{filterTab === 'done' ? 'filter-active' : ''}}" data-tab="done" bindtap="onFilter">
+        <text>已结束</text>
+        <view class="filter-badge filter-badge-done">1</view>
+      </view>
+    </view>
+
+    <!-- 感情列表 -->
+    <view class="list-wrap">
+      <!-- 进行中 1 -->
+      <view class="relation-card" data-id="1" bindtap="onTapItem">
+        <view class="card-header flex-between">
+          <view class="flex-row">
+            <view class="avatar avatar-green">
+              <t-icon name="user" size="48rpx" color="#fff" />
+            </view>
+            <view class="card-header-info">
+              <text class="card-title">张三</text>
+              <text class="card-subtitle">初恋 · 在一起 2 年</text>
+            </view>
+          </view>
+          <view class="tag tag-warning">进行中</view>
+        </view>
+        <view class="card-body">
+          <view class="flex-between mb-16">
+            <text class="text-secondary">已断联 89 天</text>
+            <text class="text-hint">最近记录：3天前</text>
+          </view>
+          <view class="progress-wrap">
+            <t-progress percentage="{{89}}" stroke-width="12rpx" color="#f6685d" track-color="#fde8e5" />
+            <text class="progress-hint">目标 100 天 · 还剩 11 天</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 进行中 2 -->
+      <view class="relation-card" data-id="2" bindtap="onTapItem">
+        <view class="card-header flex-between">
+          <view class="flex-row">
+            <view class="avatar avatar-blue">
+              <t-icon name="user" size="48rpx" color="#fff" />
+            </view>
+            <view class="card-header-info">
+              <text class="card-title">李四</text>
+              <text class="card-subtitle">前任 · 在一起 1 年</text>
+            </view>
+          </view>
+          <view class="tag tag-warning">进行中</view>
+        </view>
+        <view class="card-body">
+          <view class="flex-between mb-16">
+            <text class="text-secondary">已断联 38 天</text>
+            <text class="text-hint">最近记录：1天前</text>
+          </view>
+          <view class="progress-wrap">
+            <t-progress percentage="{{38}}" stroke-width="12rpx" color="#5B8DEF" track-color="#E8F0FE" />
+            <text class="progress-hint">目标 100 天 · 还剩 62 天</text>
+          </view>
+        </view>
+      </view>
+
+      <!-- 已结束 -->
+      <view class="relation-card relation-card-done" data-id="3" bindtap="onTapItem">
+        <view class="card-header flex-between">
+          <view class="flex-row">
+            <view class="avatar avatar-gray">
+              <t-icon name="user" size="48rpx" color="#fff" />
+            </view>
+            <view class="card-header-info">
+              <text class="card-title">王五</text>
+              <text class="card-subtitle">相亲 · 2025.06 - 2025.09</text>
+            </view>
+          </view>
+          <view class="tag tag-success">已完成</view>
+        </view>
+        <view class="card-body">
+          <view class="flex-between mb-16">
+            <text class="text-secondary">总共 120 天</text>
+            <text class="text-hint">断联成功</text>
+          </view>
+          <view class="progress-wrap">
+            <t-progress percentage="{{100}}" stroke-width="12rpx" color="#34C759" track-color="#E8F8ED" />
+            <text class="progress-hint">目标已达成 ✓</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- 空状态 -->
+    <view class="empty-wrap" wx:if="{{false}}">
+      <t-empty icon="info-circle" description="还没有感情记录" />
+    </view>
+
+  </view>
+</scroll-view>
+
+<!-- 悬浮新增按钮（置于 scroll-view 外以保持 fixed 定位） -->
+<view class="fab-btn" bindtap="onAdd">
+  <t-icon name="add" size="48rpx" color="#fff" />
+</view>

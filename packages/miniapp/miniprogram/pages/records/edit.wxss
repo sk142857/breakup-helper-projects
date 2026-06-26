@@ -1,0 +1,287 @@
+/* Skyline 页面滚动布局 */
+page { overflow: hidden; }
+
+/* 新增记录页 - 分步卡片样式 */
+
+/* ===== 步骤指示器 ===== */
+.step-indicator {
+  padding: 32rpx var(--spacing-h) 24rpx;
+}
+.step-row {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+}
+.step-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.step-dot {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: #E8E8ED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #999;
+  transition: all 0.3s ease;
+}
+.step-dot.step-current {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(246,104,93,0.35);
+}
+.step-dot.step-done {
+  background: #34C759;
+  color: #fff;
+}
+.step-label {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+.step-label.step-label-active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.step-line {
+  flex: 1;
+  height: 4rpx;
+  background: #E8E8ED;
+  margin: 26rpx 8rpx 0;
+  min-width: 32rpx;
+  transition: background 0.3s;
+}
+.step-line.step-line-done {
+  background: #34C759;
+}
+
+/* ===== 步骤卡片 ===== */
+.step-card-wrap {
+  margin: 0 var(--spacing-h);
+  padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+}
+.step-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.05);
+  animation: fadeInUp 0.3s ease;
+}
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20rpx); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.step-hint {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx 32rpx;
+  font-size: 24rpx;
+  color: var(--text-hint);
+}
+
+/* 表单项 */
+.form-item {
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid var(--border);
+}
+.form-item:last-child {
+  border-bottom: none;
+}
+.form-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+}
+/* 统一行高容器 */
+.form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 16rpx;
+  font-size: 28rpx;
+  background: var(--bg);
+  border-radius: 12rpx;
+}
+.form-row-left {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+}
+.form-text {
+  color: var(--text-primary);
+}
+.form-placeholder {
+  color: var(--text-hint);
+}
+.picker-arrow {
+  font-size: 36rpx;
+  color: #ccc;
+  line-height: 1;
+}
+.mini-avatar {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.avatar-green { background: linear-gradient(135deg, #34C759, #30D158); }
+
+/* ===== 小卡片选项（心情 / 状态） ===== */
+.option-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.option-grid-2 .option-card {
+  width: calc((100% - 16rpx) / 2);
+}
+.option-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24rpx 16rpx;
+  border-radius: 16rpx;
+  background: var(--bg);
+  border: 3rpx solid transparent;
+  box-sizing: border-box;
+  transition: all 0.2s;
+}
+.option-card.option-active {
+  background: var(--primary-light);
+  border-color: var(--primary);
+}
+.option-emoji {
+  font-size: 48rpx;
+  margin-bottom: 8rpx;
+}
+.option-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* 状态列表 */
+.status-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+.status-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 20rpx 16rpx;
+  background: var(--bg);
+  border-radius: 12rpx;
+  border: 2rpx solid transparent;
+  font-size: 28rpx;
+  color: var(--text-primary);
+  gap: 16rpx;
+  transition: all 0.2s;
+}
+.status-active {
+  border-color: var(--primary);
+  background: var(--primary-light);
+}
+
+.form-textarea-wrap {
+  background: var(--bg);
+  border-radius: 12rpx;
+  padding: 4rpx 8rpx;
+}
+
+/* ===== 图片上传（6格 Skyline 兼容） ===== */
+.upload-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.upload-item {
+  width: calc((100% - 32rpx) / 3);
+  position: relative;
+  border-radius: 12rpx;
+  overflow: hidden;
+  background: var(--bg);
+}
+.upload-spacer {
+  width: 100%;
+  padding-bottom: 100%;
+}
+.upload-inner {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+.upload-add {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2rpx dashed #DDD;
+  border-radius: 12rpx;
+  box-sizing: border-box;
+}
+.upload-placeholder {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12rpx;
+  background: var(--bg);
+}
+.upload-img {
+  width: 100%;
+  height: 100%;
+  border-radius: 12rpx;
+}
+.upload-delete {
+  position: absolute;
+  top: -2rpx;
+  right: -2rpx;
+  z-index: 2;
+}
+
+/* ===== 底部按钮 ===== */
+.form-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx var(--spacing-h) calc(20rpx + env(safe-area-inset-bottom));
+  background: linear-gradient(transparent, var(--bg) 30%);
+  z-index: 100;
+}
+.step-bottom {
+  display: flex;
+  flex-direction: row;
+  gap: 20rpx;
+}
+.btn-full {
+  flex: 1 !important;
+}
+.btn-half {
+  flex: 1 !important;
+}

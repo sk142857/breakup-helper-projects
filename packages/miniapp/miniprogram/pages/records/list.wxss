@@ -1,0 +1,87 @@
+/* Skyline 页面滚动布局 */
+page { overflow: hidden; }
+
+/* 断联记录列表页样式 */
+
+.summary-bar {
+  padding: 20rpx var(--spacing-h);
+}
+.summary-text {
+  font-size: 26rpx;
+  color: var(--text-hint);
+}
+.summary-num {
+  color: var(--primary);
+  font-weight: 700;
+}
+
+.records-list {
+  padding: 0 var(--spacing-h) 140rpx;
+}
+
+.record-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  padding: 28rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+.record-header {
+  margin-bottom: 20rpx;
+}
+.record-dot {
+  width: 16rpx;
+  height: 16rpx;
+  border-radius: 50%;
+  margin-right: 12rpx;
+}
+.record-dot-primary { background: var(--primary); }
+.record-dot-blue { background: #5B8DEF; }
+.record-dot-danger { background: var(--warning); }
+.record-dot-red { background: var(--danger); }
+
+.record-date {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.record-day {
+  font-size: 24rpx;
+  color: var(--text-hint);
+}
+
+.record-body {
+  padding-bottom: 16rpx;
+  border-bottom: 1rpx solid var(--border);
+}
+.record-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+  display: block;
+}
+.record-images {
+  display: flex;
+  flex-direction: row;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+.record-img {
+  width: 140rpx;
+  height: 140rpx;
+  border-radius: 12rpx;
+  background: var(--bg);
+}
+
+.record-footer {
+  padding-top: 16rpx;
+}
+
+.bottom-btn {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 24rpx;
+  background: linear-gradient(transparent, var(--bg) 40%);
+}

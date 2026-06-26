@@ -1,0 +1,6 @@
+<view class="launch-container">
+  <view class="launch-logo">💔</view>
+  <text class="launch-title">断联助手</text>
+  <text class="launch-subtitle">{{statusText}}</text>
+  <view class="launch-spinner" wx:if="{{loading}}"></view>
+</view>

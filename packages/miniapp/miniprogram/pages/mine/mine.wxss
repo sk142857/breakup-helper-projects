@@ -1,0 +1,84 @@
+/* 个人中心样式 */
+
+.user-card {
+  background: var(--card-bg);
+  margin: var(--spacing-h);
+  padding: 48rpx 32rpx 36rpx;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.user-avatar {
+  margin-bottom: 20rpx;
+}
+.avatar-lg {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-primary {
+  background: linear-gradient(135deg, #f6685d, #f9a098);
+}
+
+.user-nickname {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8rpx;
+}
+.user-signature {
+  font-size: 26rpx;
+  color: var(--text-hint);
+  margin-bottom: 32rpx;
+}
+
+.user-stats {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  width: 100%;
+  background: var(--bg);
+  border-radius: 16rpx;
+  padding: 24rpx 0;
+}
+.user-stat-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.user-stat-num {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: var(--primary);
+}
+.user-stat-label {
+  font-size: 22rpx;
+  color: var(--text-hint);
+  margin-top: 4rpx;
+}
+.user-stat-divider {
+  width: 2rpx;
+  height: 48rpx;
+  background: var(--border);
+}
+
+.section-wrap {
+  margin: 0 var(--spacing-h);
+}
+
+.mine-footer {
+  padding: 48rpx 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mine-footer-text {
+  font-size: 24rpx;
+  color: var(--text-hint);
+}

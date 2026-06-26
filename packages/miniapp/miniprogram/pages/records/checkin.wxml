@@ -1,0 +1,77 @@
+<!-- 断联打卡页 -->
+<t-navbar title="断联打卡" fixed left-arrow placeholder></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
+  <view class="page-container">
+
+  <!-- 打卡对象 -->
+  <view class="checkin-header">
+    <view class="checkin-avatar">
+      <view class="avatar-lg avatar-green">
+        <t-icon name="user" size="64rpx" color="#fff" />
+      </view>
+    </view>
+    <text class="checkin-name">{{name}}</text>
+    <text class="checkin-sub">已断联 {{day}} 天 · 目标 {{target}} 天</text>
+  </view>
+
+  <!-- 进度环 -->
+  <view class="checkin-progress">
+    <view class="progress-circle">
+      <view class="circle-bg">
+        <text class="circle-day">{{day}}</text>
+        <text class="circle-label">天</text>
+      </view>
+    </view>
+    <view class="progress-tag">
+      <text wx:if="{{day >= target}}" class="tag tag-success">🎉 已完成</text>
+      <text wx:else class="tag tag-warning">坚持中 · 还剩 {{target - day}} 天</text>
+    </view>
+  </view>
+
+  <!-- 今日心情 -->
+  <view class="checkin-section">
+    <text class="checkin-section-title">今日心情</text>
+    <view class="option-grid option-grid-2">
+      <view class="option-card {{selectedMood === 'great' ? 'option-active' : ''}}" data-mood="great" bindtap="onSelectMood">
+        <text class="option-emoji">😄</text>
+        <text class="option-label">很好</text>
+      </view>
+      <view class="option-card {{selectedMood === 'good' ? 'option-active' : ''}}" data-mood="good" bindtap="onSelectMood">
+        <text class="option-emoji">😊</text>
+        <text class="option-label">不错</text>
+      </view>
+      <view class="option-card {{selectedMood === 'ok' ? 'option-active' : ''}}" data-mood="ok" bindtap="onSelectMood">
+        <text class="option-emoji">😐</text>
+        <text class="option-label">一般</text>
+      </view>
+      <view class="option-card {{selectedMood === 'bad' ? 'option-active' : ''}}" data-mood="bad" bindtap="onSelectMood">
+        <text class="option-emoji">😔</text>
+        <text class="option-label">低落</text>
+      </view>
+      <view class="option-card {{selectedMood === 'terrible' ? 'option-active' : ''}}" data-mood="terrible" bindtap="onSelectMood">
+        <text class="option-emoji">😭</text>
+        <text class="option-label">难受</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 今日感想 -->
+  <view class="checkin-section">
+    <text class="checkin-section-title">今日感想（可选）</text>
+    <view class="form-textarea-wrap">
+      <t-textarea placeholder="记录今天的心情和想法..." value="{{note}}" bindchange="onNoteChange" maxlength="500" adjust-position="{{false}}" />
+    </view>
+  </view>
+
+  <!-- 打卡按钮 -->
+  <view class="checkin-bottom">
+    <t-button wx:if="{{checkedToday}}" theme="default" size="large" block shape="round" disabled>
+      今日已打卡 ✓
+    </t-button>
+    <t-button wx:else theme="primary" size="large" block shape="round" t-class="btn-full" bindtap="onCheckin">
+      打卡 · 第 {{day + 1}} 天
+    </t-button>
+  </view>
+
+  </view>
+</scroll-view>

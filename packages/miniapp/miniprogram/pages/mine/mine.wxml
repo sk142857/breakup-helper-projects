@@ -1,0 +1,68 @@
+<!-- 个人中心 -->
+<t-navbar title="我的" fixed placeholder></t-navbar>
+<view class="page-container">
+
+  <!-- 用户信息卡片 -->
+  <view class="user-card">
+    <view class="user-avatar">
+      <view class="avatar-lg avatar-primary">
+        <t-icon name="user" size="64rpx" color="#fff" />
+      </view>
+    </view>
+    <text class="user-nickname">断联者</text>
+    <text class="user-signature">时间是最好的良药 💊</text>
+    <view class="user-stats">
+      <view class="user-stat-item">
+        <text class="user-stat-num">127</text>
+        <text class="user-stat-label">累计断联(天)</text>
+      </view>
+      <view class="user-stat-divider"></view>
+      <view class="user-stat-item">
+        <text class="user-stat-num">3</text>
+        <text class="user-stat-label">感情记录</text>
+      </view>
+      <view class="user-stat-divider"></view>
+      <view class="user-stat-item">
+        <text class="user-stat-num">15</text>
+        <text class="user-stat-label">断联记录</text>
+      </view>
+    </view>
+  </view>
+
+  <view class="section-wrap">
+    <t-cell-group>
+      <t-cell
+        title="断联里程碑"
+        leftIcon="flag"
+        note="7个达成"
+        arrow
+        hover
+      />
+    </t-cell-group>
+  </view>
+
+  <!-- 设置 -->
+  <view class="section-wrap mt-24">
+    <t-cell-group>
+      <t-cell
+        title="数据导出"
+        leftIcon="download"
+        arrow
+        hover
+      />
+      <t-cell
+        title="关于断联计划"
+        leftIcon="info-circle"
+        note="v1.0.0"
+        arrow
+        hover
+      />
+    </t-cell-group>
+  </view>
+
+  <!-- 底部 -->
+  <view class="mine-footer">
+    <text class="mine-footer-text">断联计划 · 陪你走过最难的日子</text>
+  </view>
+
+</view>

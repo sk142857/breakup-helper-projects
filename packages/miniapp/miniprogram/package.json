@@ -1,0 +1,10 @@
+{
+  "name": "miniprogram",
+  "version": "1.0.0",
+  "description": "",
+  "main": "app.js",
+  "scripts": {},
+  "dependencies": {
+    "tdesign-miniprogram": "^1.15.2"
+  }
+}

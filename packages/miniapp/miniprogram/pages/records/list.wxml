@@ -1,0 +1,111 @@
+<!-- 断联记录列表页 -->
+<t-navbar title="张三 · 断联记录" fixed left-arrow placeholder></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
+  <view class="page-container">
+
+    <!-- 统计条 -->
+    <view class="summary-bar">
+      <text class="summary-text">共 <text class="summary-num">12</text> 条记录</text>
+    </view>
+
+    <!-- 记录列表 -->
+    <view class="records-list">
+
+      <!-- 记录 1 -->
+      <view class="record-card" data-id="1">
+        <view class="record-header flex-between">
+          <view class="flex-row">
+            <view class="record-dot record-dot-primary"></view>
+            <text class="record-date">6月22日 周四</text>
+          </view>
+          <text class="record-day">断联第 89 天</text>
+        </view>
+        <view class="record-body">
+          <view class="flex-row mb-16">
+            <view class="tag tag-primary">😊 平静</view>
+            <view class="tag tag-success" style="margin-left: 12rpx;">保持断联中</view>
+          </view>
+          <text class="record-text">今天差点忍不住想给她发消息，还好朋友及时拉住我了。晚上去跑了5公里，感觉好多了。</text>
+          <view class="record-images">
+            <image class="record-img" src="/images/placeholder.png" mode="aspectFill" />
+          </view>
+        </view>
+        <view class="record-footer">
+          <text class="text-hint">查看详情 →</text>
+        </view>
+      </view>
+
+      <!-- 记录 2 -->
+      <view class="record-card">
+        <view class="record-header flex-between">
+          <view class="flex-row">
+            <view class="record-dot record-dot-blue"></view>
+            <text class="record-date">6月19日 周六</text>
+          </view>
+          <text class="record-day">断联第 86 天</text>
+        </view>
+        <view class="record-body">
+          <view class="flex-row mb-16">
+            <view class="tag tag-warning">😐 一般</view>
+            <view class="tag tag-success" style="margin-left: 12rpx;">保持断联中</view>
+          </view>
+          <text class="record-text">周末和朋友出去玩了一天，想到她的次数变少了。有时候觉得一个人也挺好。</text>
+        </view>
+        <view class="record-footer">
+          <text class="text-hint">查看详情 →</text>
+        </view>
+      </view>
+
+      <!-- 记录 3 - 破功 -->
+      <view class="record-card">
+        <view class="record-header flex-between">
+          <view class="flex-row">
+            <view class="record-dot record-dot-danger"></view>
+            <text class="record-date">5月20日 周三</text>
+          </view>
+          <text class="record-day">断联第 56 天</text>
+        </view>
+        <view class="record-body">
+          <view class="flex-row mb-16">
+            <view class="tag tag-danger">😭 难过</view>
+            <view class="tag tag-danger" style="margin-left: 12rpx;">差点破功</view>
+          </view>
+          <text class="record-text">520这天看到她发了朋友圈，差点评论。打字打了一半，全部删掉了...真的很煎熬。</text>
+        </view>
+        <view class="record-footer">
+          <text class="text-hint">查看详情 →</text>
+        </view>
+      </view>
+
+      <!-- 记录 4 - 分手当天 -->
+      <view class="record-card">
+        <view class="record-header flex-between">
+          <view class="flex-row">
+            <view class="record-dot record-dot-red"></view>
+            <text class="record-date">4月1日 周三</text>
+          </view>
+          <text class="record-day">分手日</text>
+        </view>
+        <view class="record-body">
+          <view class="flex-row mb-16">
+            <view class="tag tag-danger">😭 难过</view>
+            <view class="tag tag-primary" style="margin-left: 12rpx;">开始断联</view>
+          </view>
+          <text class="record-text">正式分手了。她说我们不合适，我同意了。但心里真的很难受，决定从今天开始断联。</text>
+        </view>
+        <view class="record-footer">
+          <text class="text-hint">查看详情 →</text>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- 底部按钮 -->
+    <view class="bottom-btn">
+      <t-button theme="primary" size="large" block icon="add" shape="round" bindtap="onAddRecord">
+        新增记录
+      </t-button>
+    </view>
+
+  </view>
+</scroll-view>

@@ -1,0 +1,243 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+// ============ 用户表 ============
+model User {
+  userId     BigInt    @id @map("user_id")
+  openId     String    @unique @map("open_id") @db.VarChar(64)
+  unionId    String?   @map("union_id") @db.VarChar(64)
+  nickname   String    @default("断联者") @db.VarChar(50)
+  avatarUrl  String?   @map("avatar_url") @db.VarChar(500)
+  phone      String?   @db.VarChar(20)
+  userStatus String    @default("active") @map("user_status") @db.VarChar(20)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("t_users")
+}
+
+// ============ 第三方应用（Open API 调用方）============
+model AppClient {
+  id         Int       @id @default(autoincrement())
+  name       String    @db.VarChar(100)
+  appKey     String    @unique @map("app_key") @db.VarChar(64)
+  appSecret  String    @map("app_secret") @db.VarChar(128)
+  status     String    @default("active") @db.VarChar(20)
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
+
+  @@map("app_clients")
+}
+
+// ============ 微信应用配置 ============
+model WechatApp {
+  appId     String   @id @map("app_id") @db.VarChar(32)
+  appType   String   @map("app_type") @db.VarChar(20)
+  appSecret String   @map("app_secret") @db.VarChar(64)
+  appName   String?  @map("app_name") @db.VarChar(50)
+  appStatus String   @default("active") @map("app_status") @db.VarChar(20)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("t_wechat_apps")
+}
+
+// ============ SDK 数据采集 ============
+
+model SdkDeviceInfo {
+  infoId         String   @id @map("info_id") @db.VarChar(64)
+  openId         String?  @map("open_id") @db.VarChar(64)
+  userId         BigInt?  @map("user_id")
+  md5Str         String?  @map("md5_str") @db.VarChar(64)
+  abi            String?  @db.VarChar(128)
+  deviceAbi      String?  @map("device_abi") @db.VarChar(128)
+  benchmarkLevel Int?     @map("benchmark_level")
+  modelLevel     Int?     @map("model_level")
+  brand          String?  @db.VarChar(128)
+  model          String?  @db.VarChar(128)
+  systemName     String?  @map("system_name") @db.VarChar(128)
+  platform       String?  @db.VarChar(128)
+  cpuType        String?  @map("cpu_type") @db.VarChar(128)
+  memorySize     String?  @map("memory_size") @db.VarChar(128)
+  createdAt      DateTime @default(now()) @map("created_at")
+  modifiedAt     DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_device_info")
+}
+
+model SdkAppBaseInfo {
+  infoId            String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId      String?  @map("device_info_id") @db.VarChar(64)
+  openId            String?  @map("open_id") @db.VarChar(64)
+  userId            BigInt?  @map("user_id")
+  md5Str            String?  @map("md5_str") @db.VarChar(64)
+  sdkVersion        String?  @map("sdk_version") @db.VarChar(50)
+  enableDebug       Boolean? @map("enable_debug")
+  hostAppId         String?  @map("host_app_id") @db.VarChar(32)
+  language          String?  @db.VarChar(32)
+  version           String?  @db.VarChar(32)
+  theme             String?  @db.VarChar(32)
+  fontSizeScaleFactor Decimal? @map("font_size_scale_factor") @db.Decimal(5,2)
+  fontSizeSetting   Int?     @map("font_size_setting")
+  createdAt         DateTime? @map("created_at")
+  modifiedAt        DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_app_base_info")
+}
+
+model SdkBatteryInfo {
+  infoId              String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId        String?  @map("device_info_id") @db.VarChar(64)
+  userId              BigInt?  @map("user_id") @db.UnsignedBigInt
+  md5Str              String?  @map("md5_str") @db.VarChar(64)
+  openId              String?  @map("open_id") @db.VarChar(64)
+  batteryLevel        Int?     @map("battery_level") @db.UnsignedTinyInt
+  isCharging          Boolean? @map("is_charging")
+  isLowPowerModeEnabled Boolean? @map("is_low_power_mode_enabled")
+  createdAt           DateTime? @map("created_at")
+  modifiedAt          DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_battery_info")
+}
+
+model SdkWindowInfo {
+  infoId          String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId    String?  @map("device_info_id") @db.VarChar(64)
+  openId          String   @map("open_id") @db.VarChar(64)
+  userId          BigInt?  @map("user_id")
+  md5Str          String?  @map("md5_str") @db.VarChar(64)
+  pixelRatio      Decimal  @map("pixel_ratio") @db.Decimal(10,2)
+  screenWidth     Int      @map("screen_width")
+  screenHeight    Int      @map("screen_height")
+  windowWidth     Int      @map("window_width")
+  windowHeight    Int      @map("window_height")
+  statusBarHeight Int      @map("status_bar_height")
+  safeArea        Json?    @map("safe_area")
+  screenTop       Int      @map("screen_top")
+  createdAt       DateTime? @map("created_at")
+  modifiedAt      DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_window_info")
+}
+
+model SdkNetworkType {
+  infoId          String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId    String?  @map("device_info_id") @db.VarChar(64)
+  networkType     String?  @map("network_type") @db.VarChar(100)
+  signalStrength  Int?     @map("signal_strength")
+  hasSystemProxy  Int?     @map("has_system_proxy")
+  weakNet         Int?     @map("weak_net")
+  createdAt       DateTime? @map("created_at")
+  modifiedAt      DateTime? @map("modified_at")
+  openId          String?  @map("open_id") @db.VarChar(64)
+  userId          BigInt?  @map("user_id")
+  md5Str          String?  @map("md5_str") @db.VarChar(64)
+
+  @@map("t_wechat_miniprogram_network_type")
+}
+
+model SdkSystemSetting {
+  infoId             String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId       String?  @map("device_info_id") @db.VarChar(64)
+  openId             String?  @map("open_id") @db.VarChar(64)
+  userId             BigInt?  @map("user_id")
+  md5Str             String?  @map("md5_str") @db.VarChar(64)
+  bluetoothEnabled   Boolean? @map("bluetooth_enabled")
+  locationEnabled    Boolean? @map("location_enabled")
+  wifiEnabled        Boolean? @map("wifi_enabled")
+  deviceOrientation  String?  @map("device_orientation") @db.VarChar(50)
+  createdAt          DateTime? @map("created_at")
+  modifiedAt         DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_system_setting")
+}
+
+model SdkSkylineInfo {
+  infoId       String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId String?  @map("device_info_id") @db.VarChar(64)
+  openId       String?  @map("open_id") @db.VarChar(64)
+  userId       BigInt?  @map("user_id")
+  md5Str       String?  @map("md5_str") @db.VarChar(64)
+  isSupported  Boolean? @map("is_supported")
+  version      String?  @db.VarChar(64)
+  appVersion   String?  @map("app_version") @db.VarChar(32)
+  reason       String?  @db.VarChar(255)
+  createdAt    DateTime? @map("created_at")
+  modifiedAt   DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_skyline_info")
+}
+
+model SdkPerformanceInfo {
+  infoId         String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId   String?  @map("device_info_id") @db.VarChar(64)
+  userId         BigInt?  @map("user_id") @db.UnsignedBigInt
+  md5Str         String?  @map("md5_str") @db.VarChar(64)
+  openId         String?  @map("open_id") @db.VarChar(64)
+  entryType      String?  @map("entry_type") @db.VarChar(50)
+  startTime      BigInt?  @map("start_time") @db.UnsignedBigInt
+  duration       Int?     @map("duration") @db.UnsignedInt
+  navigationType String?  @map("navigation_type") @db.VarChar(50)
+  path           String?  @db.VarChar(255)
+  pageId         BigInt?  @map("page_id")
+  createdAt      DateTime? @map("created_at")
+  modifiedAt     DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_performance_info")
+}
+
+model SdkLaunchOptions {
+  infoId           String   @id @map("info_id") @db.VarChar(64)
+  deviceInfoId     String?  @map("device_info_id") @db.VarChar(64)
+  openId           String?  @map("open_id") @db.VarChar(64)
+  userId           BigInt?  @map("user_id")
+  md5Str           String?  @map("md5_str") @db.VarChar(64)
+  path             String?  @db.VarChar(255)
+  scene            Int?
+  appId            String?  @map("app_id") @db.VarChar(32)
+  queryObj         Json?    @map("query_obj")
+  shareTicket      String?  @map("share_ticket") @db.VarChar(255)
+  referrerInfo     Json?    @map("referrer_info")
+  forwardMaterials Json?    @map("forward_materials")
+  chatType         Int?     @map("chat_type")
+  apiCategory      String?  @map("api_category") @db.VarChar(255)
+  createdAt        DateTime? @map("created_at")
+  modifiedAt       DateTime? @map("modified_at")
+
+  @@map("t_wechat_miniprogram_launch_options")
+}
+
+model SdkEventLog {
+  logId         BigInt   @map("log_id")
+  timestamp     DateTime
+  userId        BigInt   @map("user_id")
+  openId        String?  @map("open_id") @db.VarChar(128)
+  deviceInfoId  String?  @map("device_info_id") @db.VarChar(64)
+  eventType     String   @map("event_type") @db.VarChar(64)
+  eventName     String?  @map("event_name") @db.VarChar(128)
+  pagePath      String?  @map("page_path") @db.VarChar(256)
+  pageTitle     String?  @map("page_title") @db.VarChar(128)
+  pageQuery     String?  @map("page_query") @db.VarChar(512)
+  sessionId     String?  @map("session_id") @db.VarChar(128)
+  scene         Int?
+  referrerPath  String?  @map("referrer_path") @db.VarChar(256)
+  duration      Int?                                          @db.UnsignedInt
+  deviceBrand   String?  @map("device_brand") @db.VarChar(64)
+  deviceModel   String?  @map("device_model") @db.VarChar(128)
+  osVersion     String?  @map("os_version") @db.VarChar(128)
+  platform      String?  @db.VarChar(32)
+  appVersion    String?  @map("app_version") @db.VarChar(32)
+  wxVersion     String?  @map("wx_version") @db.VarChar(32)
+  networkType   String?  @map("network_type") @db.VarChar(32)
+  extra         Json?
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  @@id([logId, timestamp])
+  @@map("t_wechat_miniprogram_event_log")
+}

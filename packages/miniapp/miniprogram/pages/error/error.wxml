@@ -1,0 +1,10 @@
+<view class="error-page">
+  <text class="error-icon">🔌</text>
+  <text class="error-title">连接失败</text>
+  <text class="error-desc">
+    连续 {{maxRetry}} 次登录授权失败，\n请检查网络后重试
+  </text>
+  <view class="retry-btn" bindtap="onRetry">
+    重新连接
+  </view>
+</view>

@@ -1,0 +1,196 @@
+/* Skyline 页面滚动布局 */
+page { overflow: hidden; }
+
+/* 感情详情页样式 */
+
+/* 底部按钮栏高度补偿 */
+.page-container {
+  padding-bottom: calc(400rpx + env(safe-area-inset-bottom));
+}
+
+/* 档案卡片 */
+.profile-card {
+  background: var(--card-bg);
+  margin: var(--spacing-h);
+  padding: 40rpx 32rpx 32rpx;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.profile-avatar {
+  margin-bottom: 20rpx;
+}
+.avatar-lg {
+  width: 128rpx;
+  height: 128rpx;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.avatar-green { background: linear-gradient(135deg, #34C759, #30D158); }
+
+.profile-name {
+  font-size: 40rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 12rpx;
+}
+.profile-tags {
+  display: flex;
+  flex-direction: row;
+  gap: 12rpx;
+  margin-bottom: 20rpx;
+}
+.profile-dates {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 12rpx;
+  font-size: 26rpx;
+  color: var(--text-secondary);
+}
+
+/* 进度卡片 */
+.progress-card {
+  background: var(--card-bg);
+  margin: 0 var(--spacing-h) var(--spacing-h);
+  padding: 32rpx;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.progress-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+.progress-main {
+  display: flex;
+  flex-direction: row;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+.progress-big {
+  display: flex;
+  align-items: baseline;
+}
+.progress-num {
+  font-size: 72rpx;
+  font-weight: 800;
+  color: var(--primary);
+  line-height: 1;
+}
+.progress-unit {
+  font-size: 28rpx;
+  color: var(--text-hint);
+  margin-left: 8rpx;
+}
+.progress-detail {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.progress-label {
+  font-size: 26rpx;
+  color: var(--warning);
+  font-weight: 600;
+}
+.progress-bar-wrap {
+  margin-top: 4rpx;
+}
+
+/* 时间线 */
+.section-header {
+  padding: 16rpx var(--spacing-h) 8rpx;
+}
+.timeline {
+  padding: 24rpx;
+  margin: 0 var(--spacing-h);
+  background: #FFFFFF;
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow);
+}
+.timeline-item {
+  display: flex;
+  flex-direction: row;
+  position: relative;
+}
+.timeline-dot {
+  width: 20rpx;
+  height: 20rpx;
+  border-radius: 50%;
+  margin-top: 8rpx;
+  flex-shrink: 0;
+  z-index: 1;
+}
+.timeline-dot-primary { background: var(--primary); }
+.timeline-dot-blue { background: #5B8DEF; }
+.timeline-dot-red { background: var(--danger); }
+
+.timeline-line {
+  width: 4rpx;
+  background: #E8E8ED;
+  position: absolute;
+  left: 8rpx;
+  top: 36rpx;
+  bottom: -16rpx;
+  z-index: 0;
+}
+.timeline-item:last-child .timeline-line {
+  display: none;
+}
+.timeline-content {
+  flex: 1;
+  margin-left: 24rpx;
+  padding-bottom: 32rpx;
+}
+.timeline-header {
+  margin-bottom: 12rpx;
+}
+.timeline-date {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-right: 16rpx;
+}
+.timeline-day {
+  font-size: 22rpx;
+  color: var(--text-hint);
+}
+.timeline-mood {
+  font-size: 24rpx;
+}
+.timeline-text {
+  font-size: 28rpx;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+.timeline-images {
+  display: flex;
+  flex-direction: row;
+  gap: 12rpx;
+  margin-top: 16rpx;
+}
+.timeline-img {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 12rpx;
+  background: var(--bg);
+}
+
+/* 底部操作栏 */
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  flex-direction: row;
+  padding: 20rpx var(--spacing-h) calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20rpx);
+  border-top: 1rpx solid var(--border);
+}

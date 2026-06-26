@@ -1,0 +1,9 @@
+# ============================================
+# 开发环境不需要 Docker
+# MySQL 和 Redis 使用你本地已安装的服务：
+#   MySQL: localhost:3306  root / 123456
+#   Redis: localhost:6379
+#
+# 生产环境部署请使用：
+#   docker-compose -f docker-compose.prod.yml up -d
+# ============================================
