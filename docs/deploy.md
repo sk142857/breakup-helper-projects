@@ -28,18 +28,25 @@ docker run -d \
 mkdir -p /docker_home/nginx-server/conf.d
 mkdir -p /docker_home/nginx-server/logs
 mkdir -p /docker_home/nginx-server/html
+mkdir -p /docker_home/nginx-server/ssl
+
+# 上传 SSL 证书到该目录（阿里云免费证书或 Let's Encrypt）
+# /docker_home/nginx-server/ssl/api.hyqingren.com.pem
+# /docker_home/nginx-server/ssl/api.hyqingren.com.key
 
 # 创建默认 nginx 配置
 cat > /docker_home/nginx-server/conf.d/default.conf << 'EOF'
 server {
     listen 80;
-    server_name _;
+    server_name api.hyqingren.com;
 
     # Admin 前端
     location / {
         proxy_pass http://helper-admin-pro:80;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
     }
 
     # API 服务
@@ -47,6 +54,38 @@ server {
         proxy_pass http://helper-api-service:3000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}
+
+server {
+    listen 443 ssl http2;
+    server_name api.hyqingren.com;
+
+    # SSL 证书（请替换为实际路径）
+    ssl_certificate     /etc/nginx/ssl/api.hyqingren.com.pem;
+    ssl_certificate_key /etc/nginx/ssl/api.hyqingren.com.key;
+
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_ciphers HIGH:!aNULL:!MD5;
+
+    # Admin 前端
+    location / {
+        proxy_pass http://helper-admin-pro:80;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
+    }
+
+    # API 服务
+    location /api/ {
+        proxy_pass http://helper-api-service:3000;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto https;
     }
 }
 EOF
@@ -61,6 +100,7 @@ docker run -d \
   -v /docker_home/nginx-server/conf.d:/etc/nginx/conf.d \
   -v /docker_home/nginx-server/logs:/var/log/nginx \
   -v /docker_home/nginx-server/html:/usr/share/nginx/html \
+  -v /docker_home/nginx-server/ssl:/etc/nginx/ssl \
   registry.cn-hangzhou.aliyuncs.com/hongyan-service/nginx:alpine
 ```
 
@@ -75,7 +115,8 @@ docker run -d \
 ├── nginx-server/
 │   ├── conf.d/             # Nginx 站点配置
 │   ├── logs/               # Nginx 访问/错误日志
-│   └── html/               # 静态文件
+│   ├── html/               # 静态文件
+│   └── ssl/                # SSL 证书
 ├── helper-api-service/     # deploy.ps1 自动管理
 │   ├── logs/
 │   └── data/
