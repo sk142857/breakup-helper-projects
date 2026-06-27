@@ -1,5 +1,6 @@
 <!-- 个人中心 -->
 <t-navbar title="我的" fixed placeholder></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
 <view class="page-container">
 
   <!-- 用户信息卡片 -->
@@ -66,3 +67,4 @@
   </view>
 
 </view>
+</scroll-view>
