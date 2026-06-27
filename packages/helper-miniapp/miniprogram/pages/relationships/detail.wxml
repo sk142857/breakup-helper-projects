@@ -23,7 +23,7 @@
   </view>
 
   <!-- 断联进度 -->
-  <view class="progress-card" bindtap="onCheckin">
+  <view class="progress-card">
     <view class="flex-between mb-24">
       <text class="progress-title">本次断联进度</text>
       <view class="tag tag-warning">进行中</view>
@@ -103,7 +103,7 @@
   <!-- 底部操作 -->
   <view class="bottom-bar">
     <t-button theme="primary" size="large" icon="add" shape="round" bindtap="onAddRecord" style="flex:1;">
-      新增记录
+      新增打卡
     </t-button>
   </view>
 

@@ -6,7 +6,6 @@
     "pages/relationships/detail",
     "pages/relationships/edit",
     "pages/records/list",
-    "pages/records/edit",
     "pages/records/checkin",
     "pages/mine/mine",
     "pages/error/error"

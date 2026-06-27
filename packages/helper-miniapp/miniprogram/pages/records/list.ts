@@ -3,7 +3,7 @@ Component({
   data: {},
   methods: {
     onAddRecord() {
-      wx.navigateTo({ url: '/pages/records/edit?id=1' });
+      wx.navigateTo({ url: '/pages/records/checkin?id=1' });
     }
   }
 });

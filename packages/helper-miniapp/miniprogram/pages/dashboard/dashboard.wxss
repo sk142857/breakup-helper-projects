@@ -84,6 +84,7 @@ page { overflow: hidden; }
 .card-header {
   padding: 28rpx 28rpx 0;
 }
+
 .card-header-info {
   margin-left: 20rpx;
 }

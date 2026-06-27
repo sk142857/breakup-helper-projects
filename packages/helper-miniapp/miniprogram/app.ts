@@ -9,9 +9,8 @@ registerPageTitles({
   'pages/relationships/detail':'关系详情',
   'pages/relationships/edit':  '编辑关系',
   'pages/records/list':        '记录列表',
-  'pages/records/edit':        '编辑记录',
-  'pages/records/checkin':     '打卡',
-  'pages/mine/mine':           '我的',
+  'pages/records/checkin':     '新增打卡',
+  'pages/mine/mine':                   '我的',
   'pages/error/error':         '错误',
 })
 
