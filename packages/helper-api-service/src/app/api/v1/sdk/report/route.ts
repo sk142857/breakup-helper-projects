@@ -19,10 +19,6 @@ function snowflakeId(): bigint {
   return (ts << 12n) | BigInt(seq)
 }
 
-function now(): Date {
-  return new Date()
-}
-
 /**
  * POST /api/v1/sdk/report
  * 微信小程序 SDK 数据采集 — 一次性上报全部信息
@@ -195,7 +191,7 @@ export async function POST(req: NextRequest) {
     if (body.events && body.events.length > 0) {
       for (const ev of body.events) {
         if (!ev.eventType) continue
-        const ts = ev.timestamp ? new Date(ev.timestamp) : now()
+        const ts = ev.timestamp ? new Date(ev.timestamp) : new Date()
         ts.setMilliseconds(0)
         writes.push(
           prisma.sdkEventLog.create({
