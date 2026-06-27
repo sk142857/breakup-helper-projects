@@ -49,8 +49,8 @@ Write-Host ""
 # ---- 2. copy .env ----
 Write-Host "[2/3] Setup .env..." -ForegroundColor Cyan
 
-$envDev = Join-Path $Root "packages\server\.env.development"
-$envTarget = Join-Path $Root "packages\server\.env"
+$envDev = Join-Path $Root "packages\helper-api-service\.env.development"
+$envTarget = Join-Path $Root "packages\helper-api-service\.env"
 
 if (Test-Path $envDev) {
     Copy-Item $envDev $envTarget -Force

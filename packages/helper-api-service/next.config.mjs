@@ -5,6 +5,7 @@ const nextConfig = {
   reactStrictMode: true,
   experimental: {
     serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
+    instrumentationHook: true,
   },
 }
 
