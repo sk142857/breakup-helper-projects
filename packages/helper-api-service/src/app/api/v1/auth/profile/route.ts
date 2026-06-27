@@ -9,7 +9,7 @@ import { ErrorCode } from '@app/shared/constants'
  * 获取当前登录用户信息
  */
 export async function GET(req: NextRequest) {
-  const guardResult = await authGuard(req)
+  const guardResult = await authGuard(req, 'user')
   if ('error' in guardResult) return guardResult.error
 
   const { userId } = guardResult.ctx

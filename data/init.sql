@@ -18,6 +18,27 @@ SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- ----------------------------
+-- Table structure for t_staff
+-- ----------------------------
+DROP TABLE IF EXISTS `t_staff`;
+CREATE TABLE `t_staff`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '登录账号',
+  `password_hash` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '密码(bcrypt)',
+  `display_name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '显示名称',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active' COMMENT '状态: active|disabled',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_username`(`username` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '后台员工表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of t_staff
+-- ----------------------------
+INSERT INTO `t_staff` VALUES (1, 'root', '$2a$10$E7vdJL/.y8NNGn3S4q9jGeWrHGbPQpf9Eyvr..AU6t5jEALNop2n6', '超级管理员', 'active', '2026-06-27 00:00:00', '2026-06-27 00:00:00');
+
+-- ----------------------------
 -- Table structure for t_dict
 -- ----------------------------
 DROP TABLE IF EXISTS `t_dict`;

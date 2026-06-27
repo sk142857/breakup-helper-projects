@@ -1,6 +1,6 @@
 import { z } from 'zod'
 
-// ============ 登录请求 & 响应 ============
+// ============ 小程序登录 ============
 
 /** POST /api/v1/auth/login 请求体 */
 export const LoginRequestSchema = z.object({
@@ -13,6 +13,28 @@ export type LoginRequest = z.infer<typeof LoginRequestSchema>
 export interface LoginResponse {
   token: string
   user: UserInfo // 引用同模块内的 UserInfo
+}
+
+// ============ 后台员工登录 ============
+
+/** POST /api/v1/auth/staff/login 请求体 */
+export const StaffLoginRequestSchema = z.object({
+  username: z.string().min(1, '账号不能为空').max(50),
+  password: z.string().min(1, '密码不能为空').max(128),
+})
+
+export type StaffLoginRequest = z.infer<typeof StaffLoginRequestSchema>
+
+/** 员工登录响应 */
+export interface StaffLoginResponse {
+  token: string
+  staff: StaffInfo
+}
+
+export interface StaffInfo {
+  id: number
+  username: string
+  displayName: string
 }
 
 // ============ 用户信息 ============

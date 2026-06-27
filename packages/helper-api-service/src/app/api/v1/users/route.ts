@@ -11,16 +11,16 @@ import { ErrorCode } from '@app/shared/constants'
  * 用户列表（分页 + 搜索）—— 需要登录
  */
 export async function GET(req: NextRequest) {
-  const guardResult = await authGuard(req)
+  const guardResult = await authGuard(req, 'user')
   if ('error' in guardResult) return guardResult.error
 
   const { searchParams } = req.nextUrl
 
   const parsed = UserQuerySchema.safeParse({
-    page: searchParams.get('page'),
-    size: searchParams.get('size'),
-    keyword: searchParams.get('keyword'),
-    status: searchParams.get('status'),
+    page: searchParams.get('page') ?? undefined,
+    size: searchParams.get('size') ?? undefined,
+    keyword: searchParams.get('keyword') ?? undefined,
+    status: searchParams.get('status') ?? undefined,
   })
 
   if (!parsed.success) {
@@ -65,7 +65,7 @@ export async function GET(req: NextRequest) {
  * 更新当前用户资料 —— 需要登录
  */
 export async function PUT(req: NextRequest) {
-  const guardResult = await authGuard(req)
+  const guardResult = await authGuard(req, 'user')
   if ('error' in guardResult) return guardResult.error
 
   const { userId } = guardResult.ctx

@@ -11,10 +11,17 @@ export default function Users() {
 
   const columns: ProColumns<User>[] = [
     {
-      title: 'ID',
+      title: '用户ID',
       dataIndex: 'userId',
       width: 80,
       search: false,
+    },
+    {
+      title: '微信标识',
+      dataIndex: 'openId',
+      width: 200,
+      ellipsis: true,
+      copyable: true,
     },
     {
       title: '姓名',
@@ -71,7 +78,7 @@ export default function Users() {
           success: true,
         }
       }}
-      rowKey="id"
+      rowKey="userId"
       search={{ labelWidth: 'auto' }}
       toolBarRender={() => [
         <ModalForm<UserCreate>

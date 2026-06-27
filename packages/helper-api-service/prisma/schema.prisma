@@ -241,3 +241,16 @@ model SdkEventLog {
   @@id([logId, timestamp])
   @@map("t_wechat_miniprogram_event_log")
 }
+
+// ============ 后台员工表 ============
+model Staff {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique @db.VarChar(50)
+  passwordHash String    @map("password_hash") @db.VarChar(128)
+  displayName  String    @map("display_name") @db.VarChar(50)
+  status       String    @default("active") @db.VarChar(20)
+  createdAt    DateTime  @default(now()) @map("created_at") @db.DateTime
+  updatedAt    DateTime  @updatedAt @map("updated_at") @db.DateTime
+
+  @@map("t_staff")
+}
