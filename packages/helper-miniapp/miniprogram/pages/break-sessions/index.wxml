@@ -50,7 +50,8 @@
 
     <!-- 断联期卡片列表 -->
     <view class="session-list">
-      <view wx:for="{{sessions}}" wx:key="sessionId" class="session-card {{item.status === 'done' ? 'session-card-done' : ''}}" data-session-id="{{item.sessionId}}" bindtap="onViewSessionRecords" hover-class="card-tap" hover-stay-time="100">
+      <block wx:for="{{sessions}}" wx:key="sessionId">
+      <view class="session-card {{item.status === 'done' ? 'session-card-done' : ''}}" data-session-id="{{item.sessionId}}" bindtap="onViewSessionRecords" hover-class="card-tap" hover-stay-time="100">
         <!-- 卡片头部 -->
         <view class="session-card-header">
           <view class="session-card-left">
@@ -68,6 +69,11 @@
           </view>
         </view>
 
+        <!-- 备注 -->
+        <view wx:if="{{item.note}}" class="session-card-note">
+          <text class="session-note-text">{{item.note}}</text>
+        </view>
+
         <!-- 进度 -->
         <view class="session-card-body">
           <view class="flex-between mb-12">
@@ -77,6 +83,7 @@
           <t-progress percentage="{{Math.min(item.recordCount / item.targetDays * 100, 100)}}" stroke-width="12rpx" color="{{item.status === 'done' ? '#34C759' : '#f6685d'}}" track-color="#fde8e5" />
         </view>
       </view>
+      </block>
 
       <!-- 空状态 -->
       <view wx:if="{{sessions.length === 0 && !loading}}" class="empty-state">
@@ -92,6 +99,6 @@
 <!-- 底部新增按钮 -->
 <view class="bottom-bar">
   <t-button theme="primary" size="large" block shape="round" bindtap="onNewBreakSession">
-    新增分手
+    新增断联
   </t-button>
 </view>

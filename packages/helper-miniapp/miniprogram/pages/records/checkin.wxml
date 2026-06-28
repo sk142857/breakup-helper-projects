@@ -6,7 +6,9 @@
   <!-- 步骤指示器 -->
   <view class="step-indicator">
     <view class="step-row">
-      <view wx:for="{{steps}}" wx:key="index" class="step-item">
+      <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+      <block wx:for="{{steps}}" wx:key="index">
+      <view class="step-item">
         <view class="step-dot-wrap">
           <view class="step-dot {{index < step ? 'step-done' : ''}} {{index === step ? 'step-current' : ''}}">
             <t-icon wx:if="{{index < step}}" name="check" size="28rpx" color="#fff" />
@@ -16,6 +18,7 @@
         </view>
         <view wx:if="{{index < steps.length - 1}}" class="step-line {{index < step ? 'step-line-done' : ''}}"></view>
       </view>
+      </block>
     </view>
   </view>
 
@@ -61,10 +64,13 @@
     <view class="step-card" wx:if="{{step === 1}}">
       <view class="form-item">
         <view class="option-grid option-grid-2">
-          <view wx:for="{{moodOptions}}" wx:key="value" class="option-card {{mood === item.value ? 'option-active' : ''}}" data-mood="{{item.value}}" bindtap="onSelectMood">
+          <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+          <block wx:for="{{moodOptions}}" wx:key="value">
+          <view class="option-card {{mood === item.value ? 'option-active' : ''}}" data-mood="{{item.value}}" bindtap="onSelectMood">
             <text class="option-emoji">{{item.emoji}}</text>
             <text class="option-label">{{item.label}}</text>
           </view>
+          </block>
         </view>
       </view>
     </view>
@@ -74,10 +80,13 @@
       <view class="form-item">
         <view class="form-label">今天断联状态</view>
         <view class="status-list">
-          <view wx:for="{{statusOptions}}" wx:key="value" class="status-item {{breakStatus === item.value ? 'status-active' : ''}}" data-status="{{item.value}}" bindtap="onSelectStatus">
+          <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+          <block wx:for="{{statusOptions}}" wx:key="value">
+          <view class="status-item {{breakStatus === item.value ? 'status-active' : ''}}" data-status="{{item.value}}" bindtap="onSelectStatus">
             <t-icon name="{{item.icon}}" size="40rpx" color="{{breakStatus === item.value ? item.color : '#ccc'}}" />
             <text>{{item.label}}</text>
           </view>
+          </block>
         </view>
       </view>
     </view>
@@ -93,7 +102,9 @@
       <view class="form-item">
         <view class="form-label">添加图片</view>
         <view class="upload-grid">
-          <view wx:for="{{slots}}" wx:key="*this" class="upload-item">
+          <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+          <block wx:for="{{slots}}" wx:key="*this">
+          <view class="upload-item">
             <view class="upload-spacer"></view>
             <view class="upload-inner">
               <view wx:if="{{imageUrls[item] || images[item]}}" style="width: 100%; height: 100%; position: relative;">
@@ -110,6 +121,7 @@
               </view>
             </view>
           </view>
+          </block>
         </view>
       </view>
     </view>

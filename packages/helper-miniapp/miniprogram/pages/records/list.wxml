@@ -10,7 +10,9 @@
 
     <!-- 记录列表 -->
     <view class="records-list">
-      <view wx:for="{{records}}" wx:key="recordId" class="record-card">
+      <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+      <block wx:for="{{records}}" wx:key="recordId">
+      <view class="record-card">
         <view class="record-top flex-between">
           <view class="record-header flex-row">
             <view class="record-dot record-dot-primary"></view>
@@ -37,6 +39,7 @@
           <text class="record-emoji">{{item.recMoodEmoji}}</text>
         </view>
       </view>
+      </block>
 
       <view wx:if="{{records.length === 0 && !loading}}" class="empty-state">
         <t-icon name="file-text" size="80rpx" color="#ddd" />

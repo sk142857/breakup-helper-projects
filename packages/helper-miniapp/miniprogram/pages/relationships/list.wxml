@@ -20,7 +20,9 @@
 
     <!-- 感情列表 -->
     <view class="list-wrap">
-      <view wx:for="{{list}}" wx:key="relId" class="relation-card {{item.relStatus === 'done' ? 'relation-card-done' : ''}}" data-id="{{item.relId}}" bindtap="onTapItem">
+      <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+      <block wx:for="{{list}}" wx:key="relId">
+      <view class="relation-card {{item.relStatus === 'done' ? 'relation-card-done' : ''}}" data-id="{{item.relId}}" bindtap="onTapItem">
         <view class="card-header flex-between">
           <view class="flex-row">
             <view wx:if="{{item.avatarUrl}}" class="avatar">
@@ -48,6 +50,7 @@
           </view>
         </view>
       </view>
+      </block>
 
       <view wx:if="{{list.length === 0 && !loading}}" class="empty-state">
         <t-icon name="heart" size="100rpx" color="#ddd" />

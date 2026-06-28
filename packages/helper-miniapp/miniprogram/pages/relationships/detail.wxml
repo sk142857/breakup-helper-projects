@@ -41,7 +41,9 @@
     <!-- 断联期切换面板 -->
     <view wx:if="{{sessionListVisible}}" class="session-switcher">
       <scroll-view scroll-y style="max-height: 400rpx;">
-        <view wx:for="{{sessions}}" wx:key="sessionId" class="session-item {{currentSessionId === item.sessionId ? 'session-item-active' : ''}}" data-session-id="{{item.sessionId}}" bindtap="onSwitchSession">
+        <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+        <block wx:for="{{sessions}}" wx:key="sessionId">
+        <view class="session-item {{currentSessionId === item.sessionId ? 'session-item-active' : ''}}" data-session-id="{{item.sessionId}}" bindtap="onSwitchSession">
           <view class="session-item-left">
             <text class="session-item-label">{{item.statusLabel}}</text>
             <text class="session-item-date">{{item.startDate}} ~ {{item.endDate || '至今'}}</text>
@@ -88,7 +90,9 @@
   </view>
 
   <view class="timeline">
-    <view wx:for="{{records}}" wx:key="recordId" class="timeline-item">
+    <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+    <block wx:for="{{records}}" wx:key="recordId">
+    <view class="timeline-item">
       <view class="timeline-dot timeline-dot-primary"></view>
       <view class="timeline-line" wx:if="{{index < records.length - 1}}"></view>
       <view class="timeline-content">
@@ -116,6 +120,7 @@
         </view>
       </view>
     </view>
+    </block>
 
     <view wx:if="{{records.length === 0 && !loading}}" class="empty-state">
       <t-icon name="file-text" size="80rpx" color="#ddd" />
