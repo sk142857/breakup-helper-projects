@@ -8,7 +8,7 @@
  * - 记录页面停留时长
  * - 支持自定义事件
  */
-import { API_BASE_URL } from './request'
+import { getApiBaseUrl } from './request'
 import { EventType, EventName } from './eventEnum'
 import type { EventTypeValue, EventNameValue } from './eventEnum'
 
@@ -103,7 +103,7 @@ function flush(): void {
   const token = wx.getStorageSync('token') || ''
 
   wx.request({
-    url: `${API_BASE_URL}/api/v1/sdk/events`,
+    url: `${getApiBaseUrl()}/api/v1/sdk/events`,
     method: 'POST',
     header: {
       'Content-Type': 'application/json',

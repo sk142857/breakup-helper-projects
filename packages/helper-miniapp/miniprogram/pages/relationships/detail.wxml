@@ -6,19 +6,25 @@
   <!-- 感情档案 -->
   <view class="profile-card">
     <view class="profile-avatar">
-      <view class="avatar-lg avatar-green">
+      <view wx:if="{{avatarUrl}}" class="avatar-circle-sm">
+        <image src="{{avatarUrl}}" mode="aspectFill" class="avatar-preview-sm" />
+      </view>
+      <view wx:else class="avatar-lg avatar-green">
         <t-icon name="user" size="64rpx" color="#fff" />
       </view>
     </view>
-    <text class="profile-name">张三</text>
+    <view class="card-delete-btn" bindtap="confirmDelete">
+      <t-icon name="delete" size="28rpx" color="#fff" />
+    </view>
+    <text class="profile-name">{{nickname}}</text>
     <view class="profile-tags">
-      <view class="tag tag-primary">初恋</view>
-      <view class="tag tag-primary">在一起 2 年</view>
+      <view class="tag tag-primary">{{relTypeLabel}}</view>
+      <view wx:if="{{endDate}}" class="tag tag-primary">{{startDate}} ~ {{endDate}}</view>
     </view>
     <view class="profile-dates">
-      <text>2024 年 3 月</text>
-      <t-icon name="arrow-right" size="28rpx" color="#ccc" />
-      <text>2026 年 4 月</text>
+      <text>{{startDate}}</text>
+      <t-icon wx:if="{{endDate}}" name="arrow-right" size="28rpx" color="#ccc" />
+      <text wx:if="{{endDate}}">{{endDate}}</text>
     </view>
   </view>
 
@@ -26,85 +32,64 @@
   <view class="progress-card">
     <view class="flex-between mb-24">
       <text class="progress-title">本次断联进度</text>
-      <view class="tag tag-warning">进行中</view>
+      <view class="tag {{relStatus === 'active' ? 'tag-warning' : relStatus === 'done' ? 'tag-success' : 'tag-default'}}">{{relStatusLabel}}</view>
     </view>
     <view class="progress-main">
       <view class="progress-big">
-        <text class="progress-num">89</text>
-        <text class="progress-unit">/ 100 天</text>
+        <text class="progress-num">{{breakDays}}</text>
+        <text class="progress-unit">/ {{breakTargetDays}} 天</text>
       </view>
       <view class="progress-detail">
-        <text class="progress-label">剩余 11 天</text>
+        <text class="progress-label">剩余 {{breakTargetDays > breakDays ? breakTargetDays - breakDays : 0}} 天</text>
       </view>
     </view>
     <view class="progress-bar-wrap">
-      <t-progress percentage="{{89}}" stroke-width="16rpx" color="#f6685d" track-color="#fde8e5" />
+      <t-progress percentage="{{Math.min(breakDays / breakTargetDays * 100, 100)}}" stroke-width="16rpx" color="#f6685d" track-color="#fde8e5" />
     </view>
   </view>
 
   <!-- 分手时间线 -->
   <view class="section-header flex-between">
     <text class="section-title">分手时间线</text>
-    <text class="text-hint" bindtap="onViewAllRecords">查看全部 12 条 →</text>
+    <text class="text-hint" bindtap="onViewAllRecords">查看全部 {{totalRecords}} 条 →</text>
   </view>
 
   <view class="timeline">
-    <!-- 记录 1 -->
-    <view class="timeline-item">
+    <view wx:for="{{records}}" wx:key="recordId" class="timeline-item">
       <view class="timeline-dot timeline-dot-primary"></view>
-      <view class="timeline-line"></view>
+      <view class="timeline-line" wx:if="{{index < records.length - 1}}"></view>
       <view class="timeline-content">
         <view class="timeline-header flex-between">
           <view class="flex-row">
-            <text class="timeline-date">6月22日</text>
-            <text class="timeline-day">断联第 89 天</text>
+            <text class="timeline-date">{{item.recordDate}}</text>
+            <text class="timeline-day">断联记录</text>
           </view>
-          <text class="timeline-mood">😊 平静</text>
+          <text class="timeline-mood">{{item.recMood}}</text>
         </view>
-        <text class="timeline-text">今天差点忍不住想给她发消息，还好朋友及时拉住我了。晚上去跑了5公里，感觉好多了。</text>
-        <view class="timeline-images">
-          <image class="timeline-img" src="/images/placeholder.png" mode="aspectFill" />
+        <text wx:if="{{item.content}}" class="timeline-text">{{item.content}}</text>
+        <view wx:if="{{item.images && item.images.length > 0}}" class="timeline-images">
+          <image wx:for="{{item.images}}" wx:key="*this" class="timeline-img" src="{{item}}" mode="aspectFill" />
         </view>
       </view>
     </view>
 
-    <!-- 记录 2 -->
-    <view class="timeline-item">
-      <view class="timeline-dot timeline-dot-blue"></view>
-      <view class="timeline-line"></view>
-      <view class="timeline-content">
-        <view class="timeline-header flex-between">
-          <view class="flex-row">
-            <text class="timeline-date">6月19日</text>
-            <text class="timeline-day">断联第 86 天</text>
-          </view>
-          <text class="timeline-mood">😐 一般</text>
-        </view>
-        <text class="timeline-text">周末和朋友出去玩了一天，想到她的次数变少了。有时候觉得一个人也挺好。</text>
-      </view>
-    </view>
-
-    <!-- 记录 3 - 分手当天 -->
-    <view class="timeline-item">
-      <view class="timeline-dot timeline-dot-red"></view>
-      <view class="timeline-content">
-        <view class="timeline-header flex-between">
-          <view class="flex-row">
-            <text class="timeline-date">4月1日</text>
-            <text class="timeline-day">分手当天</text>
-          </view>
-          <text class="timeline-mood">😭 难过</text>
-        </view>
-        <text class="timeline-text">正式分手了。她说我们不合适，我同意了。但心里真的很难受，决定从今天开始断联。</text>
-      </view>
+    <view wx:if="{{records.length === 0 && !loading}}" class="empty-state">
+      <t-icon name="file-text" size="80rpx" color="#ddd" />
+      <text class="empty-title">暂无断联记录</text>
+      <text class="empty-desc">点击底部按钮新增打卡</text>
     </view>
   </view>
 
   <!-- 底部操作 -->
   <view class="bottom-bar">
-    <t-button theme="primary" size="large" icon="add" shape="round" bindtap="onAddRecord" style="flex:1;">
-      新增打卡
-    </t-button>
+    <view class="bottom-btn-row">
+      <t-button theme="default" size="large" shape="round" bindtap="onEdit" style="flex: 1;">
+        编辑感情
+      </t-button>
+      <t-button theme="primary" size="large" shape="round" bindtap="onAddRecord" style="flex: 1;">
+        新增打卡
+      </t-button>
+    </view>
   </view>
 
   </view>

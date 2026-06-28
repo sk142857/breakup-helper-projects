@@ -101,11 +101,16 @@ page { overflow: hidden; }
   align-items: center;
   justify-content: center;
 }
-.avatar-preview {
+.avatar-circle {
   width: 140rpx;
   height: 140rpx;
   border-radius: 50%;
-  border: 4rpx solid var(--primary);
+  overflow: hidden;
+}
+.avatar-preview {
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 .avatar-green { background: linear-gradient(135deg, #34C759, #30D158); }
 .avatar-hint {
@@ -120,6 +125,7 @@ page { overflow: hidden; }
 }
 .form-item:last-child {
   border-bottom: none;
+  padding-bottom: 60rpx;
 }
 .form-label {
   font-size: 28rpx;
@@ -158,6 +164,21 @@ page { overflow: hidden; }
 }
 .form-tip-error {
   color: #FF3B30;
+}
+
+/* picker-view 日期滚轮 */
+.date-picker-wrap {
+  padding: 0 32rpx 24rpx;
+  background: var(--card-bg);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  font-size: 32rpx;
+  color: var(--text-primary);
 }
 
 .form-textarea-wrap {

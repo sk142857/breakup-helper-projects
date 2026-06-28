@@ -3,23 +3,20 @@
 /** 生产环境 API 域名 */
 const PROD_API_BASE = 'https://api.hyqingren.com'
 
-/** 获取 API 基础地址：开发环境 → localhost，体验/正式环境 → 生产域名 */
-function getApiBaseUrl(): string {
+/** 获取 API 基础地址：开发版 → localhost，体验版/正式版/未知 → 生产域名 */
+export function getApiBaseUrl(): string {
   try {
     const account = wx.getAccountInfoSync?.()
     const envVersion = account?.miniProgram?.envVersion
+    console.log('[request] envVersion:', envVersion)
     if (envVersion === 'develop') {
-      return 'http://localhost:3000'
-      //return 'https://api.hyqingren.com'
+      //return 'http://localhost:3000'
     }
   } catch {
-    // 获取失败（低版本基础库等），安全降级到 localhost
+    // 获取失败（低版本基础库等），安全降级到生产域名
   }
   return PROD_API_BASE
 }
-
-/** API 服务器地址 */
-export const API_BASE_URL = getApiBaseUrl()
 
 // ============ 类型 ============
 
@@ -83,7 +80,7 @@ export function request<T = unknown>(options: RequestOptions): Promise<ApiRespon
 
   return new Promise((resolve, reject) => {
     wx.request({
-      url: `${API_BASE_URL}${url}`,
+      url: `${getApiBaseUrl()}${url}`,
       method,
       header: headers,
       data: data || {},
@@ -138,4 +135,53 @@ export function put<T = unknown>(url: string, data?: Record<string, unknown>) {
 
 export function del<T = unknown>(url: string) {
   return request<T>({ url, method: 'DELETE' })
+}
+
+// ============ 文件上传 ============
+
+export interface UploadResult {
+  fileId: string
+  fileName: string
+  fileSize: number
+  mimeType: string
+  origUrl: string
+  thumbUrl: string | null
+}
+
+export type UploadMode = 'original' | 'thumbnail' | 'both'
+
+/**
+ * 上传文件到服务器
+ * @param filePath 本地文件路径
+ * @param mode 上传模式: original | thumbnail | both（默认 both）
+ */
+export function uploadFile(filePath: string, mode: UploadMode = 'both'): Promise<ApiResponse<UploadResult>> {
+  const token = wx.getStorageSync('token')
+
+  return new Promise((resolve, reject) => {
+    wx.uploadFile({
+      url: `${getApiBaseUrl()}/api/v1/upload`,
+      filePath,
+      name: 'file',
+      formData: { mode },
+      header: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      success(res) {
+        if (res.statusCode >= 200 && res.statusCode < 300) {
+          try {
+            const body = JSON.parse(res.data) as ApiResponse<UploadResult>
+            resolve(body)
+          } catch {
+            reject(new Error('解析上传响应失败'))
+          }
+        } else {
+          reject(new Error(`上传失败 (${res.statusCode})`))
+        }
+      },
+      fail(err) {
+        reject(new Error(err.errMsg || '上传请求失败'))
+      },
+    })
+  })
 }

@@ -48,6 +48,25 @@ page { overflow: hidden; }
   padding: 16rpx 0 120rpx;
 }
 
+/* 空状态 */
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding-top: 30vh;
+}
+.empty-title {
+  font-size: 28rpx;
+  color: #bbb;
+  margin-top: 24rpx;
+}
+.empty-desc {
+  font-size: 24rpx;
+  color: #d0d0d0;
+  margin-top: 8rpx;
+}
+
 /* 感情卡片（与 dashboard 完全一致） */
 .relation-card {
   background: var(--card-bg);

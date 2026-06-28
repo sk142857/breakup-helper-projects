@@ -3,7 +3,6 @@
     "t-navbar": "tdesign-miniprogram/navbar/navbar",
     "t-icon": "tdesign-miniprogram/icon/icon",
     "t-progress": "tdesign-miniprogram/progress/progress",
-    "t-empty": "tdesign-miniprogram/empty/empty",
     "t-button": "tdesign-miniprogram/button/button"
   }
 }

@@ -216,6 +216,30 @@ CREATE TABLE `t_users`  (
 -- ----------------------------
 
 -- ----------------------------
+-- Table structure for t_file_uploads
+-- ----------------------------
+DROP TABLE IF EXISTS `t_file_uploads`;
+CREATE TABLE `t_file_uploads`  (
+  `file_id` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '随机16位字符串ID',
+  `user_id` bigint NULL DEFAULT NULL COMMENT '上传用户 ID',
+  `file_name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '文件名',
+  `file_size` int NOT NULL COMMENT '文件大小（字节）',
+  `mime_type` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'MIME 类型',
+  `file_type` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'image' COMMENT '文件分类: image|video|audio|file',
+  `storage` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'local' COMMENT '存储方式: local|oss',
+  `orig_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '原文件 URL',
+  `thumb_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '缩略图 URL',
+  `md5_hash` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '文件 MD5',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`file_id`) USING BTREE,
+  INDEX `idx_user_id`(`user_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '文件上传记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of t_file_uploads
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for t_wechat_apps
 -- ----------------------------
 DROP TABLE IF EXISTS `t_wechat_apps`;

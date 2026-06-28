@@ -20,89 +20,43 @@
 
     <!-- 感情列表 -->
     <view class="list-wrap">
-      <!-- 进行中 1 -->
-      <view class="relation-card" data-id="1" bindtap="onTapItem">
+      <view wx:for="{{list}}" wx:key="relId" class="relation-card {{item.relStatus === 'done' ? 'relation-card-done' : ''}}" data-id="{{item.relId}}" bindtap="onTapItem">
         <view class="card-header flex-between">
           <view class="flex-row">
-            <view class="avatar avatar-green">
+            <view wx:if="{{item.avatarUrl}}" class="avatar">
+              <image src="{{item.avatarUrl}}" mode="aspectFill" style="width: 80rpx; height: 80rpx; border-radius: 50%;" />
+            </view>
+            <view wx:else class="avatar avatar-green">
               <t-icon name="user" size="48rpx" color="#fff" />
             </view>
             <view class="card-header-info">
-              <text class="card-title">张三</text>
-              <text class="card-subtitle">初恋 · 在一起 2 年</text>
+              <text class="card-title">{{item.nickname}}</text>
+              <text class="card-subtitle">{{item.relTypeLabel}} · {{item.startDate}}</text>
             </view>
           </view>
-          <view class="tag tag-warning">进行中</view>
+          <view class="tag {{item.relStatus === 'active' ? 'tag-warning' : item.relStatus === 'done' ? 'tag-success' : 'tag-default'}}">
+            {{item.relStatusLabel}}
+          </view>
         </view>
         <view class="card-body">
           <view class="flex-between mb-16">
-            <text class="text-secondary">已断联 89 天</text>
-            <text class="text-hint">最近记录：3天前</text>
+            <text class="text-secondary">已断联 {{item.breakDays}} 天</text>
           </view>
           <view class="progress-wrap">
-            <t-progress percentage="{{89}}" stroke-width="12rpx" color="#f6685d" track-color="#fde8e5" />
-            <text class="progress-hint">目标 100 天 · 还剩 11 天</text>
+            <t-progress percentage="{{Math.min(item.breakDays / item.breakTargetDays * 100, 100)}}" stroke-width="12rpx" color="{{item.relStatus === 'done' ? '#34C759' : '#f6685d'}}" track-color="#fde8e5" />
+            <text class="progress-hint">目标 {{item.breakTargetDays}} 天 · {{item.relStatus === 'done' ? '已达成 ✓' : '还剩 ' + (item.breakTargetDays > item.breakDays ? item.breakTargetDays - item.breakDays : 0) + ' 天'}}</text>
           </view>
         </view>
       </view>
 
-      <!-- 进行中 2 -->
-      <view class="relation-card" data-id="2" bindtap="onTapItem">
-        <view class="card-header flex-between">
-          <view class="flex-row">
-            <view class="avatar avatar-blue">
-              <t-icon name="user" size="48rpx" color="#fff" />
-            </view>
-            <view class="card-header-info">
-              <text class="card-title">李四</text>
-              <text class="card-subtitle">前任 · 在一起 1 年</text>
-            </view>
-          </view>
-          <view class="tag tag-warning">进行中</view>
-        </view>
-        <view class="card-body">
-          <view class="flex-between mb-16">
-            <text class="text-secondary">已断联 38 天</text>
-            <text class="text-hint">最近记录：1天前</text>
-          </view>
-          <view class="progress-wrap">
-            <t-progress percentage="{{38}}" stroke-width="12rpx" color="#5B8DEF" track-color="#E8F0FE" />
-            <text class="progress-hint">目标 100 天 · 还剩 62 天</text>
-          </view>
-        </view>
-      </view>
-
-      <!-- 已结束 -->
-      <view class="relation-card relation-card-done" data-id="3" bindtap="onTapItem">
-        <view class="card-header flex-between">
-          <view class="flex-row">
-            <view class="avatar avatar-gray">
-              <t-icon name="user" size="48rpx" color="#fff" />
-            </view>
-            <view class="card-header-info">
-              <text class="card-title">王五</text>
-              <text class="card-subtitle">相亲 · 2025.06 - 2025.09</text>
-            </view>
-          </view>
-          <view class="tag tag-success">已完成</view>
-        </view>
-        <view class="card-body">
-          <view class="flex-between mb-16">
-            <text class="text-secondary">总共 120 天</text>
-            <text class="text-hint">断联成功</text>
-          </view>
-          <view class="progress-wrap">
-            <t-progress percentage="{{100}}" stroke-width="12rpx" color="#34C759" track-color="#E8F8ED" />
-            <text class="progress-hint">目标已达成 ✓</text>
-          </view>
-        </view>
+      <view wx:if="{{list.length === 0 && !loading}}" class="empty-state">
+        <t-icon name="heart" size="100rpx" color="#ddd" />
+        <text class="empty-title">还没有感情记录</text>
+        <text class="empty-desc">点击右下角 + 新增一段关系</text>
       </view>
     </view>
 
-    <!-- 空状态 -->
-    <view class="empty-wrap" wx:if="{{false}}">
-      <t-empty icon="info-circle" description="还没有感情记录" />
-    </view>
+
 
   </view>
 </scroll-view>

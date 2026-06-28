@@ -15,6 +15,17 @@ export const ErrorCode = {
   USER_PHONE_EXISTS: 10002,
   WECHAT_AUTH_FAILED: 10003,
   LOGIN_FAILED: 10004,
+
+  // 感情关系
+  REL_NOT_FOUND: 11001,
+  RECORD_NOT_FOUND: 11002,
+  REL_DATE_EXISTS: 11003,
+
+  // 文件上传
+  UPLOAD_FAILED: 12001,
+  FILE_TOO_LARGE: 12002,
+  INVALID_FILE_TYPE: 12003,
+
   INVALID_SIGNATURE: 20001,
   SIGNATURE_EXPIRED: 20002,
   NONCE_REPLAYED: 20003,
@@ -37,6 +48,14 @@ export const ErrorMessage: Record<number, string> = {
   [ErrorCode.USER_PHONE_EXISTS]: '手机号已存在',
   [ErrorCode.WECHAT_AUTH_FAILED]: '微信登录授权失败',
   [ErrorCode.LOGIN_FAILED]: '登录失败',
+
+  [ErrorCode.REL_NOT_FOUND]: '感情关系不存在',
+  [ErrorCode.RECORD_NOT_FOUND]: '记录不存在',
+  [ErrorCode.REL_DATE_EXISTS]: '该日期已有记录',
+  [ErrorCode.UPLOAD_FAILED]: '文件上传失败',
+  [ErrorCode.FILE_TOO_LARGE]: '文件大小超出限制',
+  [ErrorCode.INVALID_FILE_TYPE]: '不支持的文件类型',
+
   [ErrorCode.INVALID_SIGNATURE]: '签名无效',
   [ErrorCode.SIGNATURE_EXPIRED]: '签名已过期',
   [ErrorCode.NONCE_REPLAYED]: '请求已处理，请勿重复提交',

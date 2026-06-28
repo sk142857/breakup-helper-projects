@@ -1,6 +1,10 @@
-// pages/records/checkin.ts
+import { createRecord } from '../../services/record'
+import { getRelationshipDetail } from '../../services/relationship'
+import { uploadFile } from '../../utils/request'
+
 Component({
   data: {
+    relId: '',
     step: 0,
     steps: ['关联信息', '此刻心情', '断联状态', '心情记录'],
     relationName: '',
@@ -30,24 +34,22 @@ Component({
     years: [] as number[],
     months: [] as number[],
     days: [] as number[],
-    dateIndex: [0, 0, 0]
+    dateIndex: [0, 0, 0],
+    saving: false,
   },
   methods: {
     onPrevStep() {
       if (this.data.step > 0) this.setData({ step: this.data.step - 1 });
     },
     onNextStep() {
-      // Step 0: 日期必选
       if (this.data.step === 0 && !this.data.recordDate) {
         wx.showToast({ title: '请选择记录日期', icon: 'none' });
         return;
       }
-      // Step 1: 心情必选
       if (this.data.step === 1 && !this.data.mood) {
         wx.showToast({ title: '请选择此刻心情', icon: 'none' });
         return;
       }
-      // Step 2: 状态必选
       if (this.data.step === 2 && !this.data.breakStatus) {
         wx.showToast({ title: '请选择断联状态', icon: 'none' });
         return;
@@ -98,18 +100,72 @@ Component({
       images[idx] = '';
       this.setData({ images });
     },
-    loadRelationName(id: string) {
-      // Mock 数据，后续对接后端
-      const map: Record<string, string> = { '1': '张三', '2': '李四' };
-      this.setData({ relationName: map[id] || '未知' });
+    async uploadLocalFiles(paths: string[]): Promise<string[]> {
+      const urls: string[] = [];
+      for (const p of paths) {
+        if (!p) continue;
+        if (p.startsWith('http://') || p.startsWith('https://')) {
+          urls.push(p);
+          continue;
+        }
+        try {
+          const res = await uploadFile(p, 'both');
+          if (res.code === 0) {
+            urls.push(res.data.origUrl);
+          }
+        } catch (e) {
+          console.error('[上传] 图片上传失败:', e);
+        }
+      }
+      return urls;
     },
-
-    onSave() {
+    async loadRelationName(id: string) {
+      try {
+        const res = await getRelationshipDetail(id);
+        if (res.code === 0) {
+          this.setData({ relationName: res.data.nickname });
+        }
+      } catch (e) {
+        console.error('[打卡] 加载关系名称失败:', e);
+        this.setData({ relationName: '未知' });
+      }
+    },
+    async onSave() {
       if (!this.data.recordDate) { wx.showToast({ title: '请选择记录日期', icon: 'none' }); return; }
       if (!this.data.mood) { wx.showToast({ title: '请选择此刻心情', icon: 'none' }); return; }
       if (!this.data.breakStatus) { wx.showToast({ title: '请选择断联状态', icon: 'none' }); return; }
-      wx.showToast({ title: '记录已保存', icon: 'success' });
-      setTimeout(() => wx.navigateBack(), 1200);
+      if (this.data.saving) return;
+
+      this.setData({ saving: true });
+      wx.showLoading({ title: '提交中...' });
+
+      try {
+        // 上传图片
+        const imageUrls = await this.uploadLocalFiles(this.data.images.filter(Boolean));
+
+        const payload = {
+          relId: this.data.relId,
+          recordDate: this.data.recordDate,
+          recMood: this.data.mood,
+          recBkStatus: this.data.breakStatus,
+          content: this.data.content || undefined,
+          images: imageUrls.length > 0 ? imageUrls : undefined,
+        };
+
+        const res = await createRecord(payload);
+        if (res.code === 0) {
+          wx.showToast({ title: '记录已保存', icon: 'success' });
+          setTimeout(() => wx.navigateBack(), 1200);
+        } else {
+          wx.showToast({ title: res.message || '保存失败', icon: 'none' });
+        }
+      } catch (e) {
+        console.error('[打卡] 保存失败:', e);
+        wx.showToast({ title: '网络错误，请重试', icon: 'none' });
+      } finally {
+        this.setData({ saving: false });
+        wx.hideLoading();
+      }
     }
   },
   lifetimes: {
@@ -117,7 +173,7 @@ Component({
       const pages = getCurrentPages();
       const current = pages[pages.length - 1];
       const options = (current as any).options || {};
-      const id = options.id || '1';
+      const id = options.id || '';
 
       const d = new Date();
       const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();
@@ -132,10 +188,10 @@ Component({
 
       const dateIndex = [years.length - 1, m - 1, day - 1];
 
-      this.setData({ years, months, days, today, recordDate: today, dateIndex });
+      this.setData({ relId: id, years, months, days, today, recordDate: today, dateIndex });
 
       // 根据传入的 id 加载关联名称
-      this.loadRelationName(id);
+      if (id) this.loadRelationName(id);
     }
   }
 });

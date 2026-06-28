@@ -10,7 +10,13 @@ page { overflow: hidden; }
 .step-row {
   display: flex;
   flex-direction: row;
-  align-items: flex-start;
+  align-items: center;
+  justify-content: center;
+}
+.step-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
 }
 .step-dot-wrap {
   display: flex;
@@ -52,11 +58,10 @@ page { overflow: hidden; }
   font-weight: 600;
 }
 .step-line {
-  flex: 1;
   height: 4rpx;
   background: #E8E8ED;
-  margin: 26rpx 8rpx 0;
-  min-width: 32rpx;
+  width: 64rpx;
+  margin: 0 12rpx;
   transition: background 0.3s;
 }
 .step-line.step-line-done {
@@ -295,7 +300,9 @@ page { overflow: hidden; }
   left: 0;
   right: 0;
   padding: 20rpx var(--spacing-h) calc(20rpx + env(safe-area-inset-bottom));
-  background: linear-gradient(transparent, var(--bg) 30%);
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20rpx);
+  border-top: 1rpx solid var(--border);
   z-index: 100;
 }
 .step-bottom {

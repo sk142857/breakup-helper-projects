@@ -16,6 +16,7 @@ RUN --mount=type=cache,target=/app/packages/helper-api-service/.next/cache \
 
 # ---- 生产运行 ----
 FROM node:22-alpine AS runner
+RUN apk add --no-cache libc6-compat
 WORKDIR /app
 ENV NODE_ENV=production
 

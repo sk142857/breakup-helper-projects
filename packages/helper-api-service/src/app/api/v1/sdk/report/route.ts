@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
             pixelRatio: wi.pixelRatio, screenWidth: wi.screenWidth,
             screenHeight: wi.screenHeight, windowWidth: wi.windowWidth,
             windowHeight: wi.windowHeight, statusBarHeight: wi.statusBarHeight,
-            safeArea: wi.safeArea ?? undefined, screenTop: wi.screenTop,
+            safeArea: wi.safeArea ?? undefined, screenTop: wi.screenTop ?? 0,
           },
         }).catch(e => console.error('[SDK] windowInfo 写入失败:', e)),
       )

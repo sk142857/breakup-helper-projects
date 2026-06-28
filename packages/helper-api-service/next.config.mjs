@@ -4,7 +4,7 @@ const nextConfig = {
   images: { unoptimized: true },
   reactStrictMode: true,
   experimental: {
-    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs'],
+    serverComponentsExternalPackages: ['@prisma/client', 'bcryptjs', 'sharp'],
     instrumentationHook: true,
   },
 }

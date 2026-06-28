@@ -1,5 +1,5 @@
 <!-- 新增/编辑感情页 - 分步卡片 -->
-<t-navbar title="新增感情" fixed left-arrow placeholder></t-navbar>
+<t-navbar title="{{editId ? '编辑感情' : '新增感情'}}" fixed left-arrow placeholder></t-navbar>
 <scroll-view type="custom" scroll-y class="page-scroll">
   <view class="page-container">
 
@@ -26,11 +26,19 @@
     <view class="step-card" wx:if="{{step === 0}}">
       <view class="avatar-section">
         <view class="avatar-upload" bindtap="onChooseAvatar">
-          <image wx:if="{{avatarUrl}}" class="avatar-preview" src="{{avatarUrl}}" mode="aspectFill" />
-          <view wx:else class="avatar-lg avatar-green">
-            <t-icon name="camera" size="56rpx" color="#fff" />
+          <view class="avatar-circle">
+            <image wx:if="{{avatarUrl}}" class="avatar-preview" src="{{avatarUrl}}" mode="aspectFill" />
+            <view wx:else class="avatar-lg avatar-green">
+              <t-icon name="camera" size="56rpx" color="#fff" />
+            </view>
           </view>
           <text class="avatar-hint">{{avatarUrl ? '点击更换头像' : '点击设置头像'}}</text>
+        </view>
+      </view>
+      <view wx:if="{{editId}}" class="form-item">
+        <view class="form-label">感情编号</view>
+        <view class="form-row form-row-readonly">
+          <text class="form-text">{{editId}}</text>
         </view>
       </view>
       <view class="form-item">
@@ -44,7 +52,8 @@
     <!-- Step 1: 关系类型（小卡片选项，不弹 picker） -->
     <view class="step-card" wx:if="{{step === 1}}">
       <view class="form-item">
-        <view class="form-label">你们的关系是？</view>
+        <!-- 这里暂时隐藏，禁止AI优化 -->
+        <view class="form-label" style="display:none;">你们的关系是？</view>
         <view class="option-grid option-grid-2">
           <view
             wx:for="{{typeOptions}}"
@@ -60,45 +69,54 @@
       </view>
     </view>
 
-    <!-- Step 2: 日期设置（原生日期选择器，Skyline 兼容） -->
+    <!-- Step 2: 日期设置（picker-view 滚轮） -->
     <view class="step-card" wx:if="{{step === 2}}">
       <view class="form-item">
-        <view class="form-label">开始日期</view>
-        <picker mode="date" value="{{startDate}}" end="{{today}}" bindchange="onStartDateChange">
-          <view class="form-row">
-            <text class="{{startDate ? 'form-text' : 'form-placeholder'}}">{{startDate || '请选择开始日期'}}</text>
-            <text class="picker-arrow">▾</text>
-          </view>
-        </picker>
-      </view>
-      <view class="form-item">
-        <view class="form-label">结束日期（选填）</view>
-        <picker mode="date" value="{{endDate}}" start="{{startDate || '1970-01-01'}}" bindchange="onEndDateChange">
-          <view class="form-row">
-            <text class="{{endDate ? 'form-text' : 'form-placeholder'}}">{{endDate || '请选择结束日期'}}</text>
-            <text class="picker-arrow">▾</text>
-          </view>
-        </picker>
-        <view wx:if="{{endDate && endDate < startDate}}" class="form-tip form-tip-error">
-          结束日期不能早于开始日期
-        </view>
-      </view>
-      <view class="form-item">
-        <view class="form-label">目标天数（自动计算）</view>
+        <view class="form-label">目标天数</view>
         <view class="form-row">
-          <text class="{{goalDaysText ? 'form-text' : 'form-placeholder'}}">{{goalDaysText || '请先设置起止日期'}} 天</text>
+          <text class="{{goalDaysText ? 'form-text' : 'form-placeholder'}}">{{goalDaysText || '请设置起止日期'}} 天</text>
         </view>
         <view wx:if="{{goalDays > 0}}" class="goal-hint">
           <t-icon name="info-circle" size="28rpx" color="var(--primary)" />
           <text>根据起止日期自动计算，共 {{goalDays}} 天</text>
         </view>
       </view>
+      <view class="form-item">
+        <view class="form-label">开始日期</view>
+        <view class="form-row" bindtap="onTapStartDate">
+          <text class="{{startDate ? 'form-text' : 'form-placeholder'}}">{{startDate || '请选择开始日期'}}</text>
+          <text class="picker-arrow">▾</text>
+        </view>
+      </view>
+      <view class="form-item">
+        <view class="form-label">结束日期（选填）</view>
+        <view class="form-row" bindtap="onTapEndDate">
+          <text class="{{endDate ? 'form-text' : 'form-placeholder'}}">{{endDate || '请选择结束日期'}}</text>
+          <text class="picker-arrow">▾</text>
+        </view>
+        <view wx:if="{{endDate && endDate < startDate}}" class="form-tip form-tip-error">
+          结束日期不能早于开始日期
+        </view>
+      </view>
+      <view wx:if="{{dateEditTarget}}" class="date-picker-wrap">
+        <picker-view indicator-style="height: 80rpx;" style="width: 100%; height: 300rpx;" value="{{dateEditTarget === 'start' ? startDateIndex : endDateIndex}}" bindchange="onDatePickerChange">
+          <picker-view-column>
+            <block wx:for="{{years}}" wx:key="*this"><view class="picker-item">{{item}}年</view></block>
+          </picker-view-column>
+          <picker-view-column>
+            <block wx:for="{{months}}" wx:key="*this"><view class="picker-item">{{item}}月</view></block>
+          </picker-view-column>
+          <picker-view-column>
+            <block wx:for="{{days}}" wx:key="*this"><view class="picker-item">{{item}}日</view></block>
+          </picker-view-column>
+        </picker-view>
+      </view>
     </view>
 
     <!-- Step 3: 当前状态（小卡片选项，不弹 picker） -->
     <view class="step-card" wx:if="{{step === 3}}">
       <view class="form-item">
-        <view class="form-label">当前状态</view>
+        <view class="form-label" style="display:none;">当前状态</view>
         <view class="option-grid option-grid-2">
           <view
             wx:for="{{statusOptions}}"

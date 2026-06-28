@@ -119,7 +119,7 @@ model SdkWindowInfo {
   windowHeight    Int       @map("window_height")
   statusBarHeight Int       @map("status_bar_height")
   safeArea        Json?     @map("safe_area")
-  screenTop       Int       @map("screen_top")
+  screenTop       Int?      @map("screen_top")
   createdAt       DateTime  @default(now()) @map("created_at") @db.DateTime
   modifiedAt      DateTime? @map("modified_at") @db.DateTime
 
@@ -240,6 +240,115 @@ model SdkEventLog {
 
   @@id([logId, timestamp])
   @@map("t_wechat_miniprogram_event_log")
+}
+
+// ============ 数据字典表 ============
+model Dict {
+  dictId     Int      @id @default(autoincrement()) @map("dict_id")
+  dictType   String   @map("dict_type") @db.VarChar(30)
+  dictCode   String   @map("dict_code") @db.VarChar(30)
+  dictLabel  String   @map("dict_label") @db.VarChar(50)
+  dictEmoji  String?  @map("dict_emoji") @db.VarChar(10)
+  dictDesc   String?  @map("dict_desc") @db.VarChar(100)
+  sortOrder  Int?     @default(0) @map("sort_order")
+  dictStatus String?  @default("active") @map("dict_status") @db.VarChar(20)
+  createdAt  DateTime @default(now()) @map("created_at") @db.DateTime
+  updatedAt  DateTime @updatedAt @map("updated_at") @db.DateTime
+
+  @@unique([dictType, dictCode], name: "uk_dict_type_code")
+  @@map("t_dict")
+}
+
+// ============ 感情关系表 ============
+model Relationship {
+  relId           String   @id @map("rel_id") @db.VarChar(6)
+  userId          BigInt   @map("user_id")
+  nickname        String   @map("nickname") @db.VarChar(50)
+  avatarUrl       String?  @map("avatar_url") @db.VarChar(500)
+  relType         String   @map("rel_type") @db.VarChar(20)
+  startDate       DateTime @map("start_date") @db.Date
+  endDate         DateTime? @map("end_date") @db.Date
+  breakTargetDays Int?     @default(100) @map("break_target_days")
+  relStatus       String?  @default("active") @map("rel_status") @db.VarChar(20)
+  note            String?  @map("note") @db.VarChar(500)
+  images          Json?    @map("images")
+  createdAt       DateTime @default(now()) @map("created_at") @db.DateTime
+  updatedAt       DateTime @updatedAt @map("updated_at") @db.DateTime
+
+  records     Record[]
+  milestones  UserMilestone[]
+
+  @@index([userId], name: "idx_user_id")
+  @@index([relStatus], name: "idx_rel_status")
+  @@map("t_relationships")
+}
+
+// ============ 断联记录表 ============
+model Record {
+  recordId    Int      @id @default(autoincrement()) @map("record_id")
+  relId       String   @map("rel_id") @db.VarChar(6)
+  userId      BigInt   @map("user_id")
+  recordDate  DateTime @map("record_date") @db.Date
+  recMood     String   @map("rec_mood") @db.VarChar(20)
+  recBkStatus String?  @map("rec_bk_status") @db.VarChar(20)
+  content     String?  @map("content") @db.Text
+  images      Json?    @map("images")
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.DateTime
+
+  relationship Relationship @relation(fields: [relId], references: [relId])
+
+  @@unique([relId, recordDate], name: "uk_rel_date")
+  @@index([userId], name: "idx_user_id")
+  @@index([relId], name: "idx_rel_id")
+  @@map("t_records")
+}
+
+// ============ 里程碑定义表 ============
+model Milestone {
+  msId     Int     @id @default(autoincrement()) @map("ms_id")
+  days     Int     @unique
+  title    String  @db.VarChar(50)
+  emoji    String? @db.VarChar(10)
+  sortOrder Int?   @default(0) @map("sort_order")
+
+  userMilestones UserMilestone[]
+
+  @@map("t_milestones")
+}
+
+// ============ 用户里程碑达成记录 ============
+model UserMilestone {
+  umId       Int      @id @default(autoincrement()) @map("um_id")
+  userId     BigInt   @map("user_id")
+  relId      String   @map("rel_id") @db.VarChar(6)
+  msId       Int      @map("ms_id")
+  achievedAt DateTime @default(now()) @map("achieved_at")
+
+  relationship Relationship @relation(fields: [relId], references: [relId])
+  milestone    Milestone    @relation(fields: [msId], references: [msId])
+
+  @@unique([userId, relId, msId], name: "uk_user_rel_ms")
+  @@index([relId], name: "idx_rel_id")
+  @@map("t_user_milestones")
+}
+
+// ============ 文件上传记录表 ============
+model FileUpload {
+  fileId     String   @id @map("file_id") @db.VarChar(16)
+  userId     BigInt?  @map("user_id")
+  fileName   String   @map("file_name") @db.VarChar(255)
+  fileSize   Int      @map("file_size")
+  mimeType   String   @map("mime_type") @db.VarChar(100)
+  fileType   String   @map("file_type") @db.VarChar(20) @default("image")
+  storage    String   @map("storage") @db.VarChar(20) @default("local")
+  origUrl    String   @map("orig_url") @db.VarChar(500)
+  thumbUrl   String?  @map("thumb_url") @db.VarChar(500)
+  md5Hash    String?  @map("md5_hash") @db.VarChar(64)
+  createdAt  DateTime @default(now()) @map("created_at") @db.DateTime
+
+  @@index([userId], name: "idx_user_id")
+  @@map("t_file_uploads")
 }
 
 // ============ 后台员工表 ============
