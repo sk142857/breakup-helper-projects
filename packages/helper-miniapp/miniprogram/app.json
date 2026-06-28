@@ -3,6 +3,8 @@
     "pages/launch/launch",
     "pages/dashboard/dashboard",
     "pages/relationships/list",
+    "pages/break-sessions/index",
+    "pages/break-sessions/create/index",
     "pages/relationships/detail",
     "pages/relationships/edit",
     "pages/records/list",

@@ -26,6 +26,9 @@ Thumbs.db
 *.log
 logs/
 
+# Uploads
+uploads/
+
 # Prisma
 packages/server/prisma/*.db
 packages/server/prisma/*.db-journal
@@ -37,3 +40,5 @@ packages/miniapp/node_modules/
 # Misc
 .turbo/
 *.tsbuildinfo
+
+

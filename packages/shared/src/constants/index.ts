@@ -20,6 +20,7 @@ export const ErrorCode = {
   REL_NOT_FOUND: 11001,
   RECORD_NOT_FOUND: 11002,
   REL_DATE_EXISTS: 11003,
+  SESSION_NOT_FOUND: 11004,
 
   // 文件上传
   UPLOAD_FAILED: 12001,
@@ -51,6 +52,7 @@ export const ErrorMessage: Record<number, string> = {
 
   [ErrorCode.REL_NOT_FOUND]: '感情关系不存在',
   [ErrorCode.RECORD_NOT_FOUND]: '记录不存在',
+  [ErrorCode.SESSION_NOT_FOUND]: '断联期不存在',
   [ErrorCode.REL_DATE_EXISTS]: '该日期已有记录',
   [ErrorCode.UPLOAD_FAILED]: '文件上传失败',
   [ErrorCode.FILE_TOO_LARGE]: '文件大小超出限制',

@@ -8,62 +8,64 @@
       <view class="stats-bg"></view>
       <view class="stats-content">
         <view class="stats-main">
-          <text class="stats-number">127</text>
-          <text class="stats-unit">天</text>
+          <text class="stats-number">{{activeCount}}</text>
+          <text class="stats-unit">段进行中</text>
         </view>
-        <text class="stats-label">累计断联时长</text>
+        <text class="stats-label">共 {{totalRelations}} 段感情 · {{doneCount}} 段已结束</text>
         <view class="stats-row">
           <view class="stats-item">
-            <text class="stats-value">2</text>
+            <text class="stats-value">{{activeCount}}</text>
             <text class="stats-desc">进行中</text>
           </view>
           <view class="stats-divider"></view>
           <view class="stats-item">
-            <text class="stats-value">1</text>
+            <text class="stats-value">{{doneCount}}</text>
             <text class="stats-desc">已结束</text>
           </view>
           <view class="stats-divider"></view>
           <view class="stats-item">
-            <text class="stats-value">15</text>
-            <text class="stats-desc">总记录</text>
+            <text class="stats-value">{{totalRelations}}</text>
+            <text class="stats-desc">总感情</text>
           </view>
         </view>
       </view>
     </view>
 
-    <!-- 进行中的断联 -->
+    <!-- 感情列表 -->
     <view class="section-header flex-between">
-      <text class="section-title">进行中的断联</text>
+      <text class="section-title">我的感情</text>
     </view>
 
-    <!-- 断联卡片列表 -->
+    <!-- 感情卡片列表 -->
     <view
       class="relation-card"
       wx:for="{{list}}"
-      wx:key="id"
-      data-id="{{item.id}}"
+      wx:key="relId"
+      data-id="{{item.relId}}"
       bindtap="onTapCard"
     >
       <view class="card-header flex-between">
         <view class="flex-row">
-          <view class="avatar avatar-{{item.avatarColor}}">
+          <view wx:if="{{item.avatarUrl}}" class="avatar">
+            <image src="{{item.avatarUrl}}" mode="aspectFill" style="width: 80rpx; height: 80rpx; border-radius: 50%;" />
+          </view>
+          <view wx:else class="avatar avatar-green">
             <t-icon name="user" size="48rpx" color="#fff" />
           </view>
           <view class="card-header-info">
-            <text class="card-title">{{item.name}}</text>
-            <text class="card-subtitle">{{item.subtitle}}</text>
+            <text class="card-title">{{item.nickname}}</text>
+            <text class="card-subtitle">{{item.relTypeLabel}} · {{item.startDate}}</text>
           </view>
         </view>
-        <view class="tag tag-{{item.status === '已达成' ? 'success' : 'warning'}}">{{item.status}}</view>
+        <view class="tag {{item.relStatus === 'active' ? 'tag-warning' : item.relStatus === 'done' ? 'tag-success' : 'tag-default'}}">{{item.relStatusLabel}}</view>
       </view>
       <view class="card-body">
         <view class="flex-between mb-16">
-          <text class="text-secondary">已断联 {{item.days}} 天</text>
-          <text class="text-hint">最近记录：{{item.lastRecord}}</text>
+          <text class="text-secondary">已断联 {{item.breakDays}} 天</text>
         </view>
         <view class="progress-wrap">
-          <t-progress percentage="{{item.progress}}" stroke-width="12rpx" color="#f6685d" track-color="#fde8e5" />
-          <text class="progress-hint">目标 {{item.targetDays}} 天 · 还剩 {{item.targetDays - item.days}} 天</text>
+          <t-progress percentage="{{Math.min(item.breakDays / item.breakTargetDays * 100, 100)}}" stroke-width="12rpx" color="{{item.relStatus === 'done' ? '#34C759' : '#f6685d'}}" track-color="#fde8e5" />
+          <text class="progress-hint">目标 {{item.breakTargetDays}} 天 · {{item.relStatus === 'done' ? '已达成 ✓' : '还剩 ' + (item.breakTargetDays > item.breakDays ? item.breakTargetDays - item.breakDays : 0) + ' 天'}}</text>
         </view>
       </view>
     </view>

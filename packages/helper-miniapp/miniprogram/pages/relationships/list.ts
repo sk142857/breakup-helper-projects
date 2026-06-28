@@ -19,7 +19,7 @@ Component({
     },
     onTapItem(e: WechatMiniprogram.TouchEvent) {
       const id = e.currentTarget.dataset.id;
-      wx.navigateTo({ url: `/pages/relationships/detail?id=${id}` });
+      wx.navigateTo({ url: `/pages/break-sessions/index?id=${id}` });
     },
     onAdd() {
       wx.navigateTo({ url: '/pages/relationships/edit' });
@@ -50,6 +50,11 @@ Component({
   },
   lifetimes: {
     attached() {
+      this.loadList();
+    },
+  },
+  pageLifetimes: {
+    show() {
       this.loadList();
     },
   },

@@ -1,0 +1,97 @@
+<!-- 感情断联页面 -->
+<t-navbar title="断联综合" fixed left-arrow placeholder bind:left-arrow="onBack"></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
+  <view class="page-container">
+
+    <!-- 感情档案摘要 -->
+    <view class="profile-card">
+      <view class="profile-avatar">
+        <view wx:if="{{avatarUrl}}" class="avatar-circle-sm">
+          <image src="{{avatarUrl}}" mode="aspectFill" class="avatar-preview-sm" />
+        </view>
+        <view wx:else class="avatar-lg avatar-green">
+          <t-icon name="user" size="64rpx" color="#fff" />
+        </view>
+      </view>
+      <text class="profile-name">{{nickname}}</text>
+      <view class="profile-tags">
+        <view class="tag tag-primary">{{relTypeLabel}}</view>
+        <view class="tag {{relStatus === 'active' ? 'tag-warning' : relStatus === 'done' ? 'tag-success' : 'tag-default'}}">{{relStatusLabel}}</view>
+      </view>
+      <view class="profile-dates">
+        <text>{{startDate}}</text>
+        <t-icon wx:if="{{endDate}}" name="arrow-right" size="28rpx" color="#ccc" />
+        <text wx:if="{{endDate}}"> ~ {{endDate}}</text>
+      </view>
+    </view>
+
+    <!-- 综合统计 -->
+    <view class="stats-row-card">
+      <view class="stats-item-box">
+        <text class="stats-num">{{totalSessions}}</text>
+        <text class="stats-label">总断联次数</text>
+      </view>
+      <view class="stats-divider-v"></view>
+      <view class="stats-item-box">
+        <text class="stats-num stats-num-warning">{{activeSessions}}</text>
+        <text class="stats-label">进行中</text>
+      </view>
+      <view class="stats-divider-v"></view>
+      <view class="stats-item-box">
+        <text class="stats-num">{{totalRecords}}</text>
+        <text class="stats-label">总打卡次数</text>
+      </view>
+    </view>
+
+    <!-- 断联列表标题 -->
+    <view class="section-header">
+      <text class="section-title">断联列表</text>
+    </view>
+
+    <!-- 断联期卡片列表 -->
+    <view class="session-list">
+      <view wx:for="{{sessions}}" wx:key="sessionId" class="session-card {{item.status === 'done' ? 'session-card-done' : ''}}" data-session-id="{{item.sessionId}}" bindtap="onViewSessionRecords" hover-class="card-tap" hover-stay-time="100">
+        <!-- 卡片头部 -->
+        <view class="session-card-header">
+          <view class="session-card-left">
+            <view class="session-dot {{item.status === 'active' ? 'session-dot-active' : 'session-dot-done'}}"></view>
+            <view class="session-card-info">
+              <view class="session-card-title-row">
+                <text class="session-card-status">{{item.statusLabel}}</text>
+                <text class="initiator-tag {{item.initiator === 'self' ? 'initiator-self' : 'initiator-other'}}">{{item.initiatorLabel}}</text>
+              </view>
+              <text class="session-card-date">{{item.startDate}} ~ {{item.endDate || '至今'}}</text>
+            </view>
+          </view>
+          <view class="session-delete-btn" data-session-id="{{item.sessionId}}" catchtap="onDeleteSession">
+            <t-icon name="delete" size="28rpx" color="#C7C7CC" />
+          </view>
+        </view>
+
+        <!-- 进度 -->
+        <view class="session-card-body">
+          <view class="flex-between mb-12">
+            <text class="text-secondary">已坚持 {{item.recordCount}} 天</text>
+            <text class="text-hint">目标 {{item.targetDays}} 天</text>
+          </view>
+          <t-progress percentage="{{Math.min(item.recordCount / item.targetDays * 100, 100)}}" stroke-width="12rpx" color="{{item.status === 'done' ? '#34C759' : '#f6685d'}}" track-color="#fde8e5" />
+        </view>
+      </view>
+
+      <!-- 空状态 -->
+      <view wx:if="{{sessions.length === 0 && !loading}}" class="empty-state">
+        <t-icon name="file-text" size="100rpx" color="#ddd" />
+        <text class="empty-title">还没有断联记录</text>
+        <text class="empty-desc">开始一段新的断联期吧</text>
+      </view>
+    </view>
+
+  </view>
+</scroll-view>
+
+<!-- 底部新增按钮 -->
+<view class="bottom-bar">
+  <t-button theme="primary" size="large" block shape="round" bindtap="onNewBreakSession">
+    新增分手
+  </t-button>
+</view>

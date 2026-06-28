@@ -6,23 +6,35 @@ import { authGuard } from '@/lib/authGuard'
 import {
   RecordCreateSchema,
   RecordQuerySchema,
+  MoodDict,
+  BreakStatusDict,
   type RecordInfo,
+  type ImageInfo,
 } from '@app/shared'
+import { resolveImageList } from '@/lib/image'
 import { ErrorCode } from '@app/shared/constants'
 
 /**
  * 序列化记录对象
  */
 function serializeRecord(rec: Record<string, unknown>): RecordInfo {
+  const mood = rec.recMood as string
+  const moodInfo = (MoodDict as Record<string, { label: string; emoji: string }>)[mood]
+  const bkStatus = (rec.recBkStatus as string) || null
   return {
     recordId: rec.recordId as number,
     relId: rec.relId as string,
+    sessionId: (rec.sessionId as string) || null,
     userId: Number(rec.userId),
     recordDate: (rec.recordDate as Date).toISOString().split('T')[0],
-    recMood: rec.recMood as string,
-    recBkStatus: (rec.recBkStatus as string) || null,
+    recMood: mood,
+    recMoodLabel: moodInfo?.label || mood,
+    recMoodEmoji: moodInfo?.emoji || '😶',
+    recBkStatus: bkStatus,
+    recBkStatusLabel: bkStatus ? (BreakStatusDict as Record<string, string>)[bkStatus] || bkStatus : null,
     content: (rec.content as string) || null,
     images: (rec.images as string[]) || [],
+    imageList: [],
     createdAt: (rec.createdAt as Date).toISOString(),
     updatedAt: (rec.updatedAt as Date).toISOString(),
   }
@@ -40,6 +52,7 @@ export async function GET(req: NextRequest) {
   const { searchParams } = req.nextUrl
   const parsed = RecordQuerySchema.safeParse({
     relId: searchParams.get('relId') ?? undefined,
+    sessionId: searchParams.get('sessionId') ?? undefined,
     page: searchParams.get('page') ?? undefined,
     size: searchParams.get('size') ?? undefined,
   })
@@ -48,7 +61,7 @@ export async function GET(req: NextRequest) {
     return fail(ErrorCode.VALIDATION_ERROR, '参数校验失败')
   }
 
-  const { relId, page, size } = parsed.data
+  const { relId, sessionId, page, size } = parsed.data
 
   // 验证关系归属
   const rel = await prisma.relationship.findFirst({
@@ -56,18 +69,31 @@ export async function GET(req: NextRequest) {
   })
   if (!rel) return fail(ErrorCode.REL_NOT_FOUND)
 
+  const where: Record<string, unknown> = { relId, userId: BigInt(userId) }
+  if (sessionId) where.sessionId = sessionId
+
   const [list, total] = await Promise.all([
     prisma.record.findMany({
-      where: { relId, userId: BigInt(userId) },
+      where,
       skip: (page - 1) * size,
       take: size,
       orderBy: { recordDate: 'desc' },
     }),
-    prisma.record.count({ where: { relId, userId: BigInt(userId) } }),
+    prisma.record.count({ where }),
   ])
 
+  const serialized = list.map(serializeRecord)
+
+  // 批量解析图片信息
+  const resolved = await Promise.all(
+    serialized.map(async (rec) => ({
+      ...rec,
+      imageList: await resolveImageList(rec.images),
+    })),
+  )
+
   return ok({
-    list: list.map(serializeRecord),
+    list: resolved,
     total,
     page,
     size,
@@ -112,6 +138,7 @@ export async function POST(req: NextRequest) {
   const rec = await prisma.record.create({
     data: {
       relId: data.relId,
+      sessionId: data.sessionId || null,
       userId: BigInt(userId),
       recordDate,
       recMood: data.recMood,
@@ -121,5 +148,10 @@ export async function POST(req: NextRequest) {
     },
   })
 
-  return ok(serializeRecord(rec as unknown as Record<string, unknown>), '打卡成功')
+  const createdRec = serializeRecord(
+    rec as unknown as Record<string, unknown>,
+  )
+  createdRec.imageList = await resolveImageList(createdRec.images)
+
+  return ok(createdRec, '打卡成功')
 }

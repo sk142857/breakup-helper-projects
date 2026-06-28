@@ -2,15 +2,23 @@ import { get, post, put, del } from '../utils/request'
 
 // ============ 类型定义 ============
 
+export interface ImageInfo {
+  fileId: string
+  origUrl: string
+  thumbUrl: string | null
+}
+
 export interface RecordInfo {
   recordId: number
   relId: string
+  sessionId: string | null
   userId: number
   recordDate: string
   recMood: string
   recBkStatus: string | null
   content: string | null
   images: string[]
+  imageList: ImageInfo[]
   createdAt: string
   updatedAt: string
 }
@@ -27,7 +35,7 @@ export interface PaginatedList<T> {
 /**
  * 获取记录列表（按感情关系）
  */
-export function getRecordList(params: { relId: string; page?: number; size?: number }) {
+export function getRecordList(params: { relId: string; sessionId?: string; page?: number; size?: number }) {
   return get<PaginatedList<RecordInfo>>('/api/v1/records', params)
 }
 
@@ -36,6 +44,7 @@ export function getRecordList(params: { relId: string; page?: number; size?: num
  */
 export function createRecord(data: {
   relId: string
+  sessionId?: string
   recordDate: string
   recMood: string
   recBkStatus?: string

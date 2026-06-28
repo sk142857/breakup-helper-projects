@@ -96,8 +96,8 @@
           <view wx:for="{{slots}}" wx:key="*this" class="upload-item">
             <view class="upload-spacer"></view>
             <view class="upload-inner">
-              <view wx:if="{{images[item]}}" style="width: 100%; height: 100%; position: relative;">
-                <image class="upload-img" src="{{images[item]}}" mode="aspectFill" />
+              <view wx:if="{{imageUrls[item] || images[item]}}" style="width: 100%; height: 100%; position: relative;">
+                <image class="upload-img" src="{{imageUrls[item] || images[item]}}" mode="aspectFill" />
                 <view class="upload-delete" data-index="{{item}}" catchtap="onDelImage">
                   <t-icon name="close-circle-filled" size="36rpx" color="#FF3B30" />
                 </view>

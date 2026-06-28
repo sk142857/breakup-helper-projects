@@ -3,7 +3,8 @@ import { prisma } from '@/lib/prisma'
 import { ok, fail } from '@/lib/response'
 import { validate } from '@/lib/validator'
 import { authGuard } from '@/lib/authGuard'
-import { RelationshipUpdateSchema, type RelationshipInfo } from '@app/shared'
+import { RelationshipUpdateSchema, type RelationshipInfo, type ImageInfo, SessionStatusDict, InitiatorDict, type BreakSessionInfo } from '@app/shared'
+import { resolveImageList } from '@/lib/image'
 import { ErrorCode } from '@app/shared/constants'
 
 /**
@@ -33,6 +34,7 @@ function serializeRel(rel: Record<string, unknown>): RelationshipInfo {
     relStatus: (rel.relStatus as string) || 'active',
     note: (rel.note as string) || null,
     images: (rel.images as string[]) || [],
+    imageList: [],
     breakDays: calcBreakDays(startDate, endDate),
     createdAt: (rel.createdAt as Date).toISOString(),
     updatedAt: (rel.updatedAt as Date).toISOString(),
@@ -75,6 +77,43 @@ export async function GET(
     orderBy: { milestone: { days: 'asc' } },
   })
 
+  // 查询该关系下的所有断联期
+  const sessions = await prisma.breakSession.findMany({
+    where: { relId, userId: BigInt(userId) },
+    orderBy: { startDate: 'desc' },
+  })
+
+  const sessionsWithCount = await Promise.all(
+    sessions.map(async (sess) => {
+      const count = await prisma.record.count({
+        where: { sessionId: sess.sessionId },
+      })
+      const startDate = sess.startDate as Date
+      const endDate = sess.endDate as Date | null
+      const status = (sess.status as string) || 'active'
+      const initiator = (sess.initiator as string) || 'self'
+      const sessInfo: BreakSessionInfo = {
+        sessionId: sess.sessionId,
+        relId: sess.relId,
+        userId: Number(sess.userId),
+        initiator,
+        initiatorLabel: (InitiatorDict as Record<string, string>)[initiator] || initiator,
+        startDate: startDate.toISOString().split('T')[0],
+        endDate: endDate ? endDate.toISOString().split('T')[0] : null,
+        targetDays: sess.targetDays,
+        status,
+        statusLabel: (SessionStatusDict as Record<string, string>)[status] || status,
+        note: sess.note,
+        recordCount: count,
+        createdAt: sess.createdAt.toISOString(),
+        updatedAt: sess.updatedAt.toISOString(),
+      }
+      return sessInfo
+    }),
+  )
+
+  rel.imageList = await resolveImageList(rel.images)
+
   return ok({
     ...rel,
     achievedMilestones: milestones.map(um => ({
@@ -85,6 +124,7 @@ export async function GET(
       emoji: um.milestone.emoji,
       achievedAt: um.achievedAt.toISOString(),
     })),
+    breakSessions: sessionsWithCount,
   })
 }
 
@@ -133,10 +173,12 @@ export async function PUT(
     data: updateData,
   })
 
-  return ok(
-    serializeRel(updated as unknown as Record<string, unknown>),
-    '更新成功',
+  const updatedRel = serializeRel(
+    updated as unknown as Record<string, unknown>,
   )
+  updatedRel.imageList = await resolveImageList(updatedRel.images)
+
+  return ok(updatedRel, '更新成功')
 }
 
 /**

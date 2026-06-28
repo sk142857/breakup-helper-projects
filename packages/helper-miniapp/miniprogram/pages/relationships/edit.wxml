@@ -148,8 +148,8 @@
             <view class="upload-item">
               <view class="upload-spacer"></view>
               <view class="upload-inner">
-                <block wx:if="{{images[item]}}">
-                  <image class="upload-img" src="{{images[item]}}" mode="aspectFill" />
+                <block wx:if="{{imageUrls[item] || images[item]}}">
+                  <image class="upload-img" src="{{imageUrls[item] || images[item]}}" mode="aspectFill" />
                   <view class="upload-delete" data-index="{{item}}" catchtap="onDelImage">
                     <t-icon name="close-circle-filled" size="36rpx" color="#FF3B30" />
                   </view>

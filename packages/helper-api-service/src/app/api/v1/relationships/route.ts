@@ -7,7 +7,9 @@ import {
   RelationshipCreateSchema,
   RelationshipQuerySchema,
   type RelationshipInfo,
+  type ImageInfo,
 } from '@app/shared'
+import { resolveImageList } from '@/lib/image'
 import { ErrorCode } from '@app/shared/constants'
 import { generateRelId } from '@/lib/idgen'
 
@@ -38,6 +40,7 @@ function serializeRel(rel: Record<string, unknown>): RelationshipInfo {
     relStatus: (rel.relStatus as string) || 'active',
     note: (rel.note as string) || null,
     images: (rel.images as string[]) || [],
+    imageList: [],
     breakDays: calcBreakDays(startDate, endDate),
     createdAt: (rel.createdAt as Date).toISOString(),
     updatedAt: (rel.updatedAt as Date).toISOString(),
@@ -85,8 +88,18 @@ export async function GET(req: NextRequest) {
     prisma.relationship.count({ where }),
   ])
 
+  const serialized = list.map(serializeRel)
+
+  // 批量解析图片信息
+  const resolved = await Promise.all(
+    serialized.map(async (rel) => ({
+      ...rel,
+      imageList: await resolveImageList(rel.images),
+    })),
+  )
+
   return ok({
-    list: list.map(serializeRel),
+    list: resolved,
     total,
     page,
     size,
@@ -104,11 +117,13 @@ export async function POST(req: NextRequest) {
 
   const body = await req.json().catch(() => null)
   if (!body) return fail(ErrorCode.BAD_REQUEST, '请求体不能为空')
+  console.log('[创建关系] 请求体:', JSON.stringify(body))
 
   const result = await validate(RelationshipCreateSchema, body)
   if (!result.success) return result.error
 
   const data = result.data
+  console.log('[创建关系] 校验通过, images:', data.images)
 
   const rel = await prisma.relationship.create({
     data: {
@@ -125,6 +140,10 @@ export async function POST(req: NextRequest) {
       images: data.images || [],
     },
   })
+  console.log('[创建关系] 数据库创建完成, relId:', rel.relId, 'images:', rel.images)
 
-  return ok(serializeRel(rel as unknown as Record<string, unknown>), '创建成功')
+  const createdRel = serializeRel(rel as unknown as Record<string, unknown>)
+  createdRel.imageList = await resolveImageList(createdRel.images)
+
+  return ok(createdRel, '创建成功')
 }

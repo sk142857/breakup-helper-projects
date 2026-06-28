@@ -11,22 +11,30 @@
     <!-- 记录列表 -->
     <view class="records-list">
       <view wx:for="{{records}}" wx:key="recordId" class="record-card">
-        <view class="record-header flex-between">
-          <view class="flex-row">
+        <view class="record-top flex-between">
+          <view class="record-header flex-row">
             <view class="record-dot record-dot-primary"></view>
             <text class="record-date">{{item.recordDate}}</text>
           </view>
-          <text class="record-day">{{item.recBkStatus}}</text>
+          <view class="record-delete" data-id="{{item.recordId}}" bindtap="onDeleteRecord">
+            <t-icon name="delete" size="28rpx" color="#C7C7CC" />
+          </view>
         </view>
         <view class="record-body">
           <view class="flex-row mb-16">
-            <view class="tag tag-primary">{{item.recMood}}</view>
-            <view wx:if="{{item.recBkStatus}}" class="tag tag-success" style="margin-left: 12rpx;">{{item.recBkStatus}}</view>
+            <view wx:if="{{item.recBkStatusLabel}}" class="tag tag-primary">{{item.recBkStatusLabel}}</view>
           </view>
           <text wx:if="{{item.content}}" class="record-text">{{item.content}}</text>
-          <view wx:if="{{item.images && item.images.length > 0}}" class="record-images">
+          <view wx:if="{{item.imageList && item.imageList.length > 0}}" class="record-images">
+            <image wx:for="{{item.imageList}}" wx:key="fileId" class="record-img" src="{{item.thumbUrl || item.origUrl}}" mode="aspectFill" />
+          </view>
+          <view wx:elif="{{item.images && item.images.length > 0}}" class="record-images">
             <image wx:for="{{item.images}}" wx:key="*this" class="record-img" src="{{item}}" mode="aspectFill" />
           </view>
+        </view>
+        <!-- 底部 Emoji 展示 -->
+        <view class="record-emoji-bar">
+          <text class="record-emoji">{{item.recMoodEmoji}}</text>
         </view>
       </view>
 

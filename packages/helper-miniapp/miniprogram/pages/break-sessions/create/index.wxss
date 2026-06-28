@@ -1,0 +1,283 @@
+/* 新增断联期 - 分步卡片样式 */
+
+page { overflow: hidden; }
+
+/* ===== 步骤指示器（与 checkin 一致） ===== */
+.step-indicator {
+  padding: 32rpx var(--spacing-h) 24rpx;
+}
+.step-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+}
+.step-item {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+.step-dot-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-shrink: 0;
+}
+.step-dot {
+  width: 52rpx;
+  height: 52rpx;
+  border-radius: 50%;
+  background: #E8E8ED;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 24rpx;
+  font-weight: 700;
+  color: #999;
+  transition: all 0.3s ease;
+}
+.step-dot.step-current {
+  background: var(--primary);
+  color: #fff;
+  box-shadow: 0 4rpx 16rpx rgba(246,104,93,0.35);
+}
+.step-dot.step-done {
+  background: #34C759;
+  color: #fff;
+}
+.step-label {
+  font-size: 22rpx;
+  color: #999;
+  margin-top: 8rpx;
+  white-space: nowrap;
+  transition: color 0.3s;
+}
+.step-label.step-label-active {
+  color: var(--primary);
+  font-weight: 600;
+}
+.step-line {
+  height: 4rpx;
+  background: #E8E8ED;
+  width: 64rpx;
+  margin: 0 12rpx;
+  transition: background 0.3s;
+}
+.step-line.step-line-done {
+  background: #34C759;
+}
+
+/* ===== 步骤卡片 ===== */
+.step-card-wrap {
+  margin: 0 var(--spacing-h);
+  padding-bottom: calc(160rpx + env(safe-area-inset-bottom));
+}
+.step-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-lg);
+  margin-bottom: 40rpx;
+  box-shadow: 0 4rpx 24rpx rgba(0,0,0,0.05);
+}
+
+.step-hint {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: 8rpx;
+  padding: 20rpx 32rpx;
+  font-size: 24rpx;
+  color: var(--text-hint);
+}
+
+/* ===== 选项卡片（分手类型） ===== */
+.form-item {
+  padding: 28rpx 32rpx;
+  border-bottom: 1rpx solid var(--border);
+}
+.form-item:last-child {
+  border-bottom: none;
+  padding-bottom: 90rpx;
+}
+.form-label {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 16rpx;
+}
+.form-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20rpx 16rpx;
+  font-size: 28rpx;
+  background: var(--bg);
+  border-radius: 12rpx;
+}
+.form-text {
+  color: var(--text-primary);
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.form-textarea-wrap {
+  margin-top: 8rpx;
+}
+
+.option-grid {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.option-grid-2 .option-card {
+  width: calc((100% - 16rpx) / 2);
+}
+.option-card {
+  background: var(--bg);
+  border-radius: 20rpx;
+  padding: 32rpx 20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12rpx;
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+  box-sizing: border-box;
+}
+.option-card.option-active {
+  background: #fff5f4;
+  border-color: var(--primary);
+  box-shadow: 0 4rpx 16rpx rgba(246,104,93,0.15);
+}
+.option-emoji {
+  font-size: 64rpx;
+  line-height: 1;
+}
+.option-label {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+.option-desc {
+  font-size: 22rpx;
+  color: var(--text-hint);
+  text-align: center;
+  line-height: 1.4;
+}
+
+/* ===== picker-view 日期滚轮 ===== */
+.date-picker-wrap {
+  padding: 0 32rpx 24rpx;
+  background: var(--card-bg);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+}
+.picker-item {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 80rpx;
+  font-size: 32rpx;
+  color: var(--text-primary);
+}
+
+/* ===== 目标天数选项 ===== */
+.target-chips {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 16rpx;
+}
+.target-chip {
+  padding: 16rpx 36rpx;
+  border-radius: 16rpx;
+  background: var(--bg);
+  font-size: 28rpx;
+  color: var(--text-primary);
+  border: 2rpx solid transparent;
+  transition: all 0.2s;
+}
+.target-chip-active {
+  background: #fff5f4;
+  border-color: var(--primary);
+  color: var(--primary);
+  font-weight: 600;
+}
+.target-hint {
+  font-size: 22rpx;
+  color: var(--text-hint);
+  margin-top: 16rpx;
+  padding-left: 4rpx;
+}
+
+/* ===== 确认卡片 ===== */
+.confirm-card {
+  padding: 32rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+.confirm-row {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 0;
+}
+.confirm-label {
+  font-size: 28rpx;
+  color: var(--text-hint);
+}
+.confirm-value {
+  font-size: 30rpx;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+.confirm-value-note {
+  font-weight: 400;
+  font-size: 26rpx;
+  max-width: 60%;
+  text-align: right;
+}
+.confirm-tag {
+  font-size: 28rpx;
+  font-weight: 600;
+  padding: 4rpx 20rpx;
+  border-radius: 10rpx;
+}
+.tag-self {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+.tag-other {
+  background: #fce4ec;
+  color: #c62828;
+}
+.confirm-divider {
+  height: 1rpx;
+  background: var(--border);
+}
+
+/* ===== 底部按钮 ===== */
+.form-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 20rpx var(--spacing-h) calc(20rpx + env(safe-area-inset-bottom));
+  background: rgba(255,255,255,0.96);
+  backdrop-filter: blur(20rpx);
+  display: flex;
+  flex-direction: row;
+  gap: 20rpx;
+  box-shadow: 0 -4rpx 24rpx rgba(0,0,0,0.05);
+  z-index: 100;
+}
+.btn-full {
+  width: 100%;
+}
+.btn-half {
+  flex: 1;
+}

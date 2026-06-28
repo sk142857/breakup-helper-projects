@@ -30,6 +30,8 @@ Component({
     ],
     content: '',
     images: [] as string[],
+    /** 用于 WXML 预览的图片 URL（与 images 下标对齐） */
+    imageUrls: [] as string[],
     slots: [0, 1, 2, 3, 4, 5],
     years: [] as number[],
     months: [] as number[],
@@ -83,41 +85,39 @@ Component({
     },
     onChooseImage(e: WechatMiniprogram.TouchEvent) {
       const idx = Number(e.currentTarget.dataset.index);
+      const that = this;
       wx.chooseMedia({
         count: 1,
         mediaType: ['image'],
         sizeType: ['compressed'],
-        success: (res) => {
-          const images = [...this.data.images];
-          images[idx] = res.tempFiles[0].tempFilePath;
-          this.setData({ images });
+        success: async (res) => {
+          wx.showLoading({ title: '上传中...' });
+          try {
+            const upRes = await uploadFile(res.tempFiles[0].tempFilePath, 'both', 'record');
+            if (upRes.code === 0) {
+              const images = [...that.data.images];
+              const imageUrls = [...that.data.imageUrls];
+              images[idx] = upRes.data.fileId;
+              imageUrls[idx] = upRes.data.thumbUrl || upRes.data.origUrl;
+              that.setData({ images, imageUrls });
+            } else {
+              wx.showToast({ title: upRes.message || '上传失败', icon: 'none' });
+            }
+          } catch (e) {
+            wx.showToast({ title: (e as Error).message || '上传失败', icon: 'none' });
+          } finally {
+            wx.hideLoading();
+          }
         }
       });
     },
     onDelImage(e: WechatMiniprogram.TouchEvent) {
       const idx = Number(e.currentTarget.dataset.index);
       const images = [...this.data.images];
+      const imageUrls = [...this.data.imageUrls];
       images[idx] = '';
-      this.setData({ images });
-    },
-    async uploadLocalFiles(paths: string[]): Promise<string[]> {
-      const urls: string[] = [];
-      for (const p of paths) {
-        if (!p) continue;
-        if (p.startsWith('http://') || p.startsWith('https://')) {
-          urls.push(p);
-          continue;
-        }
-        try {
-          const res = await uploadFile(p, 'both');
-          if (res.code === 0) {
-            urls.push(res.data.origUrl);
-          }
-        } catch (e) {
-          console.error('[上传] 图片上传失败:', e);
-        }
-      }
-      return urls;
+      imageUrls[idx] = '';
+      this.setData({ images, imageUrls });
     },
     async loadRelationName(id: string) {
       try {
@@ -140,16 +140,17 @@ Component({
       wx.showLoading({ title: '提交中...' });
 
       try {
-        // 上传图片
-        const imageUrls = await this.uploadLocalFiles(this.data.images.filter(Boolean));
+        // 图片在选择时已上传，直接取 fileId
+        const imageIds = this.data.images.filter(Boolean);
 
         const payload = {
           relId: this.data.relId,
+          sessionId: this.data.sessionId || undefined,
           recordDate: this.data.recordDate,
           recMood: this.data.mood,
           recBkStatus: this.data.breakStatus,
           content: this.data.content || undefined,
-          images: imageUrls.length > 0 ? imageUrls : undefined,
+          images: imageIds.length > 0 ? imageIds : undefined,
         };
 
         const res = await createRecord(payload);
@@ -160,20 +161,23 @@ Component({
           wx.showToast({ title: res.message || '保存失败', icon: 'none' });
         }
       } catch (e) {
-        console.error('[打卡] 保存失败:', e);
-        wx.showToast({ title: '网络错误，请重试', icon: 'none' });
+        wx.showToast({ title: (e as Error).message || '网络错误，请重试', icon: 'none' });
       } finally {
         this.setData({ saving: false });
         wx.hideLoading();
       }
     }
   },
+  /**
+   * 接收页面路由参数（Component 作为页面时，URL 查询参数自动映射到 properties）
+   */
+  properties: {
+    id: { type: String, value: '' },
+    sessionId: { type: String, value: '' },
+  },
   lifetimes: {
     attached() {
-      const pages = getCurrentPages();
-      const current = pages[pages.length - 1];
-      const options = (current as any).options || {};
-      const id = options.id || '';
+      const id = this.data.id || '';
 
       const d = new Date();
       const y = d.getFullYear(), m = d.getMonth() + 1, day = d.getDate();

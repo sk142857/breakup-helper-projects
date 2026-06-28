@@ -31,6 +31,8 @@ Component({
     ],
     note: '',
     images: [] as string[],
+    /** 用于 WXML 预览的图片 URL（与 images 下标对齐） */
+    imageUrls: [] as string[],
     slots: [0, 1, 2, 3, 4, 5],
     saving: false,
     // picker-view 日期
@@ -72,6 +74,7 @@ Component({
       this.setData({ name: e.detail.value });
     },
     onChooseAvatar() {
+      const that = this;
       wx.chooseMedia({
         count: 1,
         mediaType: ['image'],
@@ -80,8 +83,20 @@ Component({
           wx.cropImage({
             src: res.tempFiles[0].tempFilePath,
             cropScale: '1:1',
-            success: (crop) => {
-              this.setData({ avatarUrl: crop.tempFilePath });
+            success: async (crop) => {
+              wx.showLoading({ title: '上传中...' });
+              try {
+                const upRes = await uploadFile(crop.tempFilePath, 'thumbnail', 'relationship');
+                if (upRes.code === 0) {
+                  that.setData({ avatarUrl: upRes.data.thumbUrl || upRes.data.origUrl });
+                } else {
+                  wx.showToast({ title: upRes.message || '上传失败', icon: 'none' });
+                }
+              } catch (e) {
+                wx.showToast({ title: (e as Error).message || '上传失败', icon: 'none' });
+              } finally {
+                wx.hideLoading();
+              }
             }
           });
         }
@@ -147,48 +162,49 @@ Component({
     },
     onChooseImage(e: WechatMiniprogram.TouchEvent) {
       const idx = Number(e.currentTarget.dataset.index);
+      const that = this;
       wx.chooseMedia({
         count: 1,
         mediaType: ['image'],
         sizeType: ['compressed'],
-        success: (res) => {
-          const images = [...this.data.images];
-          images[idx] = res.tempFiles[0].tempFilePath;
-          this.setData({ images });
+        success: async (res) => {
+          wx.showLoading({ title: '上传中...' });
+          try {
+            const upRes = await uploadFile(res.tempFiles[0].tempFilePath, 'both', 'relationship');
+            if (upRes.code === 0) {
+              const images = [...that.data.images];
+              const imageUrls = [...that.data.imageUrls];
+              images[idx] = upRes.data.fileId;
+              imageUrls[idx] = upRes.data.thumbUrl || upRes.data.origUrl;
+              that.setData({ images, imageUrls });
+            } else {
+              wx.showToast({ title: upRes.message || '上传失败', icon: 'none' });
+            }
+          } catch (e) {
+            wx.showToast({ title: (e as Error).message || '上传失败', icon: 'none' });
+          } finally {
+            wx.hideLoading();
+          }
         }
       });
     },
     onDelImage(e: WechatMiniprogram.TouchEvent) {
       const idx = Number(e.currentTarget.dataset.index);
       const images = [...this.data.images];
+      const imageUrls = [...this.data.imageUrls];
       images[idx] = '';
-      this.setData({ images });
-    },
-    async uploadLocalFiles(paths: string[]): Promise<string[]> {
-      const urls: string[] = [];
-      for (const p of paths) {
-        if (!p) continue;
-        // 如果是已有远程 URL 则跳过上传
-        if (p.startsWith('http://') || p.startsWith('https://')) {
-          urls.push(p);
-          continue;
-        }
-        try {
-          const res = await uploadFile(p, 'both');
-          if (res.code === 0) {
-            urls.push(res.data.origUrl);
-          }
-        } catch (e) {
-          console.error('[上传] 图片上传失败:', e);
-        }
-      }
-      return urls;
+      imageUrls[idx] = '';
+      this.setData({ images, imageUrls });
     },
     async loadEditData(id: string) {
       try {
         const res = await getRelationshipDetail(id);
         if (res.code === 0) {
           const d = res.data;
+          // 从 imageList 取预览 URL，兼容旧数据回退到 images
+          const imageUrls = d.imageList?.length
+            ? d.imageList.map((img: { origUrl: string }) => img.origUrl)
+            : (d.images || []);
           this.setData({
             name: d.nickname,
             avatarUrl: d.avatarUrl || '',
@@ -200,6 +216,7 @@ Component({
             status: d.relStatus,
             note: d.note || '',
             images: d.images || [],
+            imageUrls,
           });
           // 初始化日期滚轮索引
           this.setData({
@@ -221,21 +238,10 @@ Component({
       wx.showLoading({ title: '保存中...' });
 
       try {
-        // 1. 上传头像
-        let avatarUrl = '';
-        if (this.data.avatarUrl && !this.data.avatarUrl.startsWith('http')) {
-          const uploadRes = await uploadFile(this.data.avatarUrl, 'thumbnail');
-          if (uploadRes.code === 0) {
-            avatarUrl = uploadRes.data.origUrl;
-          }
-        } else if (this.data.avatarUrl) {
-          avatarUrl = this.data.avatarUrl;
-        }
+        // 头像和图片都在选择时已上传，这里直接取 fileId
+        const avatarUrl = this.data.avatarUrl;
+        const imageIds = this.data.images.filter(Boolean);
 
-        // 2. 上传图片
-        const imageUrls = await this.uploadLocalFiles(this.data.images.filter(Boolean));
-
-        // 3. 构建请求数据
         const payload = {
           nickname: this.data.name.trim(),
           avatarUrl: avatarUrl || undefined,
@@ -245,7 +251,7 @@ Component({
           breakTargetDays: this.data.goalDays > 0 ? this.data.goalDays : undefined,
           relStatus: this.data.status,
           note: this.data.note || undefined,
-          images: imageUrls.length > 0 ? imageUrls : undefined,
+          images: imageIds.length > 0 ? imageIds : undefined,
         };
 
         let res;
@@ -262,8 +268,7 @@ Component({
           wx.showToast({ title: res.message || '保存失败', icon: 'none' });
         }
       } catch (e) {
-        console.error('[保存] 失败:', e);
-        wx.showToast({ title: '网络错误，请重试', icon: 'none' });
+        wx.showToast({ title: (e as Error).message || '网络错误，请重试', icon: 'none' });
       } finally {
         this.setData({ saving: false });
         wx.hideLoading();

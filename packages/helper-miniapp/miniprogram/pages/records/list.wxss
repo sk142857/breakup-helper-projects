@@ -96,6 +96,27 @@ page { overflow: hidden; }
   padding-top: 16rpx;
 }
 
+.record-top {
+  margin-bottom: 20rpx;
+}
+.record-delete {
+  margin-left: 12rpx;
+  width: 48rpx;
+  height: 48rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.record-emoji-bar {
+  display: flex;
+  justify-content: flex-end;
+  padding-top: 12rpx;
+}
+.record-emoji {
+  font-size: 48rpx;
+  line-height: 1;
+}
+
 .bottom-btn {
   position: fixed;
   bottom: 0;

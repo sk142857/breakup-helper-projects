@@ -10,7 +10,7 @@ export function getApiBaseUrl(): string {
     const envVersion = account?.miniProgram?.envVersion
     console.log('[request] envVersion:', envVersion)
     if (envVersion === 'develop') {
-      //return 'http://localhost:3000'
+      return 'http://localhost:3000'
     }
   } catch {
     // 获取失败（低版本基础库等），安全降级到生产域名
@@ -89,11 +89,11 @@ export function request<T = unknown>(options: RequestOptions): Promise<ApiRespon
         const body = res.data as ApiResponse<T>
 
         if (statusCode === 401 || body.code === 401) {
-          // Token 过期，清除并触发重新登录
+          // Token 过期，清除并跳转登录页
           wx.removeStorageSync('token')
           wx.removeStorageSync('userInfo')
-          // 广播登录过期事件
           getApp<IAppOption>().globalData.loginExpired = true
+          wx.reLaunch({ url: '/pages/launch/launch' })
           reject(new Error('登录已过期'))
           return
         }
@@ -154,16 +154,18 @@ export type UploadMode = 'original' | 'thumbnail' | 'both'
  * 上传文件到服务器
  * @param filePath 本地文件路径
  * @param mode 上传模式: original | thumbnail | both（默认 both）
+ * @param bizType 业务类型: relationship | record | common（默认 common）
  */
-export function uploadFile(filePath: string, mode: UploadMode = 'both'): Promise<ApiResponse<UploadResult>> {
+export function uploadFile(filePath: string, mode: UploadMode = 'both', bizType: string = 'common'): Promise<ApiResponse<UploadResult>> {
   const token = wx.getStorageSync('token')
+  const apiUrl = `${getApiBaseUrl()}/api/v1/upload`
 
   return new Promise((resolve, reject) => {
     wx.uploadFile({
-      url: `${getApiBaseUrl()}/api/v1/upload`,
+      url: apiUrl,
       filePath,
       name: 'file',
-      formData: { mode },
+      formData: { mode, bizType },
       header: {
         ...(token ? { Authorization: `Bearer ${token}` } : {}),
       },

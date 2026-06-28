@@ -1,56 +1,57 @@
 // pages/dashboard/dashboard.ts
 
-interface RelationItem {
-  id: number
-  name: string
-  subtitle: string
-  avatarColor: string
-  status: string
-  privacy: string
-  days: number
-  targetDays: number
-  lastRecord: string
-  progress: number
-}
-
-const MOCK_LIST: RelationItem[] = [
-  {
-    id: 1,
-    name: '张三',
-    subtitle: '初恋 · 在一起 2 年',
-    avatarColor: 'green',
-    status: '进行中',
-    privacy: '私密',
-    days: 89,
-    targetDays: 100,
-    lastRecord: '3天前',
-    progress: 89,
-  },
-  {
-    id: 2,
-    name: '李四',
-    subtitle: '前任 · 在一起 1 年',
-    avatarColor: 'blue',
-    status: '进行中',
-    privacy: '公开',
-    days: 38,
-    targetDays: 100,
-    lastRecord: '1天前',
-    progress: 38,
-  },
-]
+import { getRelationshipList, type RelationshipInfo } from '../../services/relationship'
 
 Component({
   data: {
-    list: MOCK_LIST,
+    list: [] as RelationshipInfo[],
+    loading: false,
+    totalRelations: 0,
+    activeCount: 0,
+    doneCount: 0,
+    totalRecords: 0,
   },
   methods: {
     onTapCard(e: WechatMiniprogram.TouchEvent) {
       const id = e.currentTarget.dataset.id;
-      wx.navigateTo({ url: `/pages/relationships/detail?id=${id}` });
+      wx.navigateTo({ url: `/pages/break-sessions/index?id=${id}` });
     },
     onAddRelationship() {
       wx.navigateTo({ url: '/pages/relationships/edit' });
     },
-  }
+    async loadList() {
+      this.setData({ loading: true });
+      try {
+        const res = await getRelationshipList({ page: 1, size: 50 });
+        if (res.code === 0) {
+          const list = res.data.list;
+          let activeCount = 0, doneCount = 0;
+          list.forEach((item: RelationshipInfo) => {
+            if (item.relStatus === 'active') activeCount++;
+            else if (item.relStatus === 'done') doneCount++;
+          });
+          this.setData({
+            list,
+            totalRelations: list.length,
+            activeCount,
+            doneCount,
+          });
+        }
+      } catch (e) {
+        console.error('[断联计划] 加载关系列表失败:', e);
+      } finally {
+        this.setData({ loading: false });
+      }
+    },
+  },
+  lifetimes: {
+    attached() {
+      this.loadList();
+    },
+  },
+  pageLifetimes: {
+    show() {
+      this.loadList();
+    },
+  },
 });

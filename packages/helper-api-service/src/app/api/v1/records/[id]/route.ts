@@ -3,22 +3,31 @@ import { prisma } from '@/lib/prisma'
 import { ok, fail } from '@/lib/response'
 import { validate } from '@/lib/validator'
 import { authGuard } from '@/lib/authGuard'
-import { RecordUpdateSchema, type RecordInfo } from '@app/shared'
+import { RecordUpdateSchema, MoodDict, BreakStatusDict, type RecordInfo, type ImageInfo } from '@app/shared'
+import { resolveImageList } from '@/lib/image'
 import { ErrorCode } from '@app/shared/constants'
 
 /**
  * 序列化记录对象
  */
 function serializeRecord(rec: Record<string, unknown>): RecordInfo {
+  const mood = rec.recMood as string
+  const moodInfo = (MoodDict as Record<string, { label: string; emoji: string }>)[mood]
+  const bkStatus = (rec.recBkStatus as string) || null
   return {
     recordId: rec.recordId as number,
     relId: rec.relId as string,
+    sessionId: (rec.sessionId as string) || null,
     userId: Number(rec.userId),
     recordDate: (rec.recordDate as Date).toISOString().split('T')[0],
-    recMood: rec.recMood as string,
-    recBkStatus: (rec.recBkStatus as string) || null,
+    recMood: mood,
+    recMoodLabel: moodInfo?.label || mood,
+    recMoodEmoji: moodInfo?.emoji || '😶',
+    recBkStatus: bkStatus,
+    recBkStatusLabel: bkStatus ? (BreakStatusDict as Record<string, string>)[bkStatus] || bkStatus : null,
     content: (rec.content as string) || null,
     images: (rec.images as string[]) || [],
+    imageList: [],
     createdAt: (rec.createdAt as Date).toISOString(),
     updatedAt: (rec.updatedAt as Date).toISOString(),
   }
@@ -44,7 +53,11 @@ export async function GET(
   })
   if (!rec) return fail(ErrorCode.RECORD_NOT_FOUND)
 
-  return ok(serializeRecord(rec as unknown as Record<string, unknown>))
+  const serialized = serializeRecord(
+    rec as unknown as Record<string, unknown>,
+  )
+  serialized.imageList = await resolveImageList(serialized.images)
+  return ok(serialized)
 }
 
 /**
@@ -86,10 +99,12 @@ export async function PUT(
     data: updateData,
   })
 
-  return ok(
-    serializeRecord(updated as unknown as Record<string, unknown>),
-    '更新成功',
+  const updatedRec = serializeRecord(
+    updated as unknown as Record<string, unknown>,
   )
+  updatedRec.imageList = await resolveImageList(updatedRec.images)
+
+  return ok(updatedRec, '更新成功')
 }
 
 /**

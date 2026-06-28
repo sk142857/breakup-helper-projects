@@ -14,3 +14,16 @@ export function generateRelId(): string {
   }
   return id
 }
+
+/**
+ * 生成 12 位随机字母数字字符串
+ * 用于断联期主键
+ */
+export function generateSessionId(): string {
+  const bytes = randomBytes(12)
+  let id = ''
+  for (let i = 0; i < 12; i++) {
+    id += CHARS[bytes[i] % 36]
+  }
+  return id
+}

@@ -2,6 +2,12 @@ import { get, post, put, del } from '../utils/request'
 
 // ============ 类型定义 ============
 
+export interface ImageInfo {
+  fileId: string
+  origUrl: string
+  thumbUrl: string | null
+}
+
 export interface RelationshipInfo {
   relId: string
   userId: number
@@ -14,6 +20,7 @@ export interface RelationshipInfo {
   relStatus: string
   note: string | null
   images: string[]
+  imageList: ImageInfo[]
   breakDays: number
   createdAt: string
   updatedAt: string

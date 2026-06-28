@@ -31,9 +31,39 @@
   <!-- 断联进度 -->
   <view class="progress-card">
     <view class="flex-between mb-24">
-      <text class="progress-title">本次断联进度</text>
+      <view class="flex-row" bindtap="onToggleSessionList" style="flex:1;">
+        <text class="progress-title">本次断联进度</text>
+        <t-icon wx:if="{{currentSession}}" name="{{sessionListVisible ? 'chevron-up' : 'chevron-down'}}" size="28rpx" color="#999" style="margin-left: 8rpx;" />
+      </view>
       <view class="tag {{relStatus === 'active' ? 'tag-warning' : relStatus === 'done' ? 'tag-success' : 'tag-default'}}">{{relStatusLabel}}</view>
     </view>
+
+    <!-- 断联期切换面板 -->
+    <view wx:if="{{sessionListVisible}}" class="session-switcher">
+      <scroll-view scroll-y style="max-height: 400rpx;">
+        <view wx:for="{{sessions}}" wx:key="sessionId" class="session-item {{currentSessionId === item.sessionId ? 'session-item-active' : ''}}" data-session-id="{{item.sessionId}}" bindtap="onSwitchSession">
+          <view class="session-item-left">
+            <text class="session-item-label">{{item.statusLabel}}</text>
+            <text class="session-item-date">{{item.startDate}} ~ {{item.endDate || '至今'}}</text>
+          </view>
+          <view class="session-item-right">
+            <text class="session-item-count">{{item.recordCount}} 次</text>
+            <t-icon wx:if="{{currentSessionId === item.sessionId}}" name="check-circle-filled" size="28rpx" color="#f6685d" />
+          </view>
+        </view>
+      </scroll-view>
+      <view class="session-actions">
+        <view class="session-action-btn" bindtap="onNewBreakSession">
+          <t-icon name="add" size="24rpx" color="#f6685d" />
+          <text>新增分手</text>
+        </view>
+        <view wx:if="{{currentSession && currentSession.status === 'active'}}" class="session-action-btn" bindtap="onEndSession">
+          <t-icon name="stop" size="24rpx" color="#FF3B30" />
+          <text>结束断联</text>
+        </view>
+      </view>
+    </view>
+
     <view class="progress-main">
       <view class="progress-big">
         <text class="progress-num">{{breakDays}}</text>
@@ -50,7 +80,10 @@
 
   <!-- 分手时间线 -->
   <view class="section-header flex-between">
-    <text class="section-title">分手时间线</text>
+    <view class="flex-row">
+      <text class="section-title">分手时间线</text>
+      <text wx:if="{{currentSession}}" class="text-hint" style="font-size: 22rpx; margin-left: 8rpx;">第{{sessions.indexOf(currentSession) + 1}}段</text>
+    </view>
     <text class="text-hint" bindtap="onViewAllRecords">查看全部 {{totalRecords}} 条 →</text>
   </view>
 
@@ -64,11 +97,22 @@
             <text class="timeline-date">{{item.recordDate}}</text>
             <text class="timeline-day">断联记录</text>
           </view>
-          <text class="timeline-mood">{{item.recMood}}</text>
+          <view class="timeline-delete" data-id="{{item.recordId}}" bindtap="onDeleteRecord">
+            <t-icon name="delete" size="24rpx" color="#C7C7CC" />
+          </view>
         </view>
         <text wx:if="{{item.content}}" class="timeline-text">{{item.content}}</text>
-        <view wx:if="{{item.images && item.images.length > 0}}" class="timeline-images">
+        <view wx:if="{{item.recBkStatusLabel}}" class="tag tag-success" style="font-size: 22rpx; padding: 4rpx 12rpx; margin-top: 12rpx;">{{item.recBkStatusLabel}}</view>
+        <view wx:if="{{item.imageList && item.imageList.length > 0}}" class="timeline-images">
+          <image wx:for="{{item.imageList}}" wx:key="fileId" class="timeline-img" src="{{item.thumbUrl || item.origUrl}}" mode="aspectFill" />
+        </view>
+        <!-- 兼容旧数据：直接使用 images 数组中的 URL -->
+        <view wx:elif="{{item.images && item.images.length > 0}}" class="timeline-images">
           <image wx:for="{{item.images}}" wx:key="*this" class="timeline-img" src="{{item}}" mode="aspectFill" />
+        </view>
+        <!-- Emoji 展示（底部） -->
+        <view class="timeline-emoji-bar">
+          <text class="timeline-emoji">{{item.recMoodEmoji}}</text>
         </view>
       </view>
     </view>

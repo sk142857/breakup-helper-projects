@@ -1,0 +1,142 @@
+<!-- 新增断联期 - 分步卡片 -->
+<t-navbar title="新增分手" fixed left-arrow placeholder bind:left-arrow="onBack"></t-navbar>
+<scroll-view type="custom" scroll-y class="page-scroll">
+  <view class="page-container">
+
+  <!-- 步骤指示器 -->
+  <view class="step-indicator">
+    <view class="step-row">
+      <view wx:for="{{steps}}" wx:key="index" class="step-item">
+        <view class="step-dot-wrap">
+          <view class="step-dot {{index < step ? 'step-done' : ''}} {{index === step ? 'step-current' : ''}}">
+            <t-icon wx:if="{{index < step}}" name="check" size="28rpx" color="#fff" />
+            <text wx:else>{{index + 1}}</text>
+          </view>
+          <text class="step-label {{index === step ? 'step-label-active' : ''}}">{{item}}</text>
+        </view>
+        <view wx:if="{{index < steps.length - 1}}" class="step-line {{index < step ? 'step-line-done' : ''}}"></view>
+      </view>
+    </view>
+  </view>
+
+  <!-- 步骤卡片 -->
+  <view class="step-card-wrap">
+
+    <!-- Step 0: 分手类型 -->
+    <view class="step-card" wx:if="{{step === 0}}">
+      <view class="step-hint">
+        <t-icon name="chat" size="28rpx" color="#f6685d" />
+        <text>这次分手，是谁提出的？</text>
+      </view>
+      <view class="form-item">
+        <view class="option-grid option-grid-2">
+          <view class="option-card {{initiator === 'self' ? 'option-active' : ''}}" data-initiator="self" bindtap="onSelectInitiator">
+            <text class="option-emoji">😤</text>
+            <text class="option-label">我分手</text>
+            <text class="option-desc">是我主动提出的</text>
+          </view>
+          <view class="option-card {{initiator === 'other' ? 'option-active' : ''}}" data-initiator="other" bindtap="onSelectInitiator">
+            <text class="option-emoji">😢</text>
+            <text class="option-label">被分手</text>
+            <text class="option-desc">是对方提出的</text>
+          </view>
+        </view>
+      </view>
+    </view>
+
+    <!-- Step 1: 开始日期 -->
+    <view class="step-card" wx:if="{{step === 1}}">
+      <view class="step-hint">
+        <t-icon name="calendar" size="28rpx" color="#f6685d" />
+        <text>选择分手开始的日期</text>
+      </view>
+      <view class="form-item">
+        <view class="form-label">开始日期</view>
+        <view class="form-row">
+          <text class="form-text">{{startDate}}</text>
+        </view>
+      </view>
+      <view class="date-picker-wrap">
+        <picker-view indicator-style="height: 80rpx;" style="width: 100%; height: 340rpx;" value="{{dateIndex}}" bindchange="onDateChange">
+          <picker-view-column>
+            <block wx:for="{{years}}" wx:key="*this"><view class="picker-item">{{item}}年</view></block>
+          </picker-view-column>
+          <picker-view-column>
+            <block wx:for="{{months}}" wx:key="*this"><view class="picker-item">{{item}}月</view></block>
+          </picker-view-column>
+          <picker-view-column>
+            <block wx:for="{{days}}" wx:key="*this"><view class="picker-item">{{item}}日</view></block>
+          </picker-view-column>
+        </picker-view>
+      </view>
+    </view>
+
+    <!-- Step 2: 目标设置 -->
+    <view class="step-card" wx:if="{{step === 2}}">
+      <view class="step-hint">
+        <t-icon name="target" size="28rpx" color="#f6685d" />
+        <text>设定断联目标和备注</text>
+      </view>
+      <view class="form-item">
+        <view class="form-label">目标天数</view>
+        <view class="target-chips">
+          <view wx:for="{{targetPresets}}" wx:key="value" class="target-chip {{targetDays === item.value ? 'target-chip-active' : ''}}" data-value="{{item.value}}" bindtap="onSelectTarget">
+            <text>{{item.label}}</text>
+          </view>
+        </view>
+        <view wx:if="{{targetDays === 9999}}" class="target-hint">选择「永久」意味着不设限</view>
+      </view>
+      <view class="form-item">
+        <view class="form-label">备注（可选）</view>
+        <view class="form-textarea-wrap">
+          <t-textarea placeholder="可以记录分手的原因或想说的话..." value="{{note}}" bindchange="onNoteChange" maxlength="{{500}}" autosize indicator adjust-position="{{false}}" />
+        </view>
+      </view>
+    </view>
+
+    <!-- Step 3: 确认创建 -->
+    <view class="step-card" wx:if="{{step === 3}}">
+      <view class="step-hint">
+        <t-icon name="check-circle" size="28rpx" color="#34C759" />
+        <text>请确认断联信息</text>
+      </view>
+      <view class="confirm-card">
+        <view class="confirm-row">
+          <text class="confirm-label">分手类型</text>
+          <view class="confirm-tag {{initiator === 'self' ? 'tag-self' : 'tag-other'}}">{{initiatorLabel}}</view>
+        </view>
+        <view class="confirm-divider"></view>
+        <view class="confirm-row">
+          <text class="confirm-label">开始日期</text>
+          <text class="confirm-value">{{startDate}}</text>
+        </view>
+        <view class="confirm-divider"></view>
+        <view class="confirm-row">
+          <text class="confirm-label">目标天数</text>
+          <text class="confirm-value">{{targetDays === 9999 ? '永久' : targetDays + ' 天'}}</text>
+        </view>
+        <view wx:if="{{note}}" class="confirm-divider"></view>
+        <view wx:if="{{note}}" class="confirm-row confirm-row-note">
+          <text class="confirm-label">备注</text>
+          <text class="confirm-value confirm-value-note">{{note}}</text>
+        </view>
+      </view>
+    </view>
+
+  </view>
+
+  <!-- 底部按钮组 -->
+  <view class="form-bottom step-bottom">
+    <t-button wx:if="{{step > 0}}" theme="default" size="large" shape="round" t-class="btn-half" bindtap="onPrevStep">
+      上一步
+    </t-button>
+    <t-button wx:if="{{step < steps.length - 1}}" theme="primary" size="large" shape="round" t-class="{{step > 0 ? 'btn-half' : 'btn-full'}}" bindtap="onNextStep">
+      下一步
+    </t-button>
+    <t-button wx:if="{{step === steps.length - 1}}" theme="primary" size="large" shape="round" loading="{{saving}}" t-class="{{step > 0 ? 'btn-half' : 'btn-full'}}" bindtap="onSave">
+      确认创建
+    </t-button>
+  </view>
+
+  </view>
+</scroll-view>

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import type { ImageInfo } from './upload'
 
 // ============ 心情字典 ============
 export const MoodDict = {
@@ -33,6 +34,7 @@ export type BreakStatusCode = keyof typeof BreakStatusDict
 /** 创建记录请求 */
 export const RecordCreateSchema = z.object({
   relId: z.string().min(1, '关联感情不能为空'),
+  sessionId: z.string().optional().nullable(),
   recordDate: z.string().min(1, '记录日期不能为空'),
   recMood: z.string().min(1, '心情不能为空'),
   recBkStatus: z.string().optional().nullable(),
@@ -55,6 +57,7 @@ export type RecordUpdate = z.infer<typeof RecordUpdateSchema>
 /** 查询记录列表 */
 export const RecordQuerySchema = z.object({
   relId: z.string().min(1),
+  sessionId: z.string().optional(),
   page: z.coerce.number().int().min(1).default(1),
   size: z.coerce.number().int().min(1).max(100).default(20),
 })
@@ -66,12 +69,19 @@ export type RecordQuery = z.infer<typeof RecordQuerySchema>
 export interface RecordInfo {
   recordId: number
   relId: string
+  sessionId: string | null
   userId: number
   recordDate: string
   recMood: string
+  recMoodLabel: string
+  recMoodEmoji: string
   recBkStatus: string | null
+  recBkStatusLabel: string | null
   content: string | null
+  /** fileId 列表（兼容旧数据中的 URL 字符串） */
   images: string[]
+  /** 图片详细信息（fileId → origUrl/thumbUrl 映射） */
+  imageList: ImageInfo[]
   createdAt: string
   updatedAt: string
 }

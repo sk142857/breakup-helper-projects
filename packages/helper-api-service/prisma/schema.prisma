@@ -275,18 +275,42 @@ model Relationship {
   createdAt       DateTime @default(now()) @map("created_at") @db.DateTime
   updatedAt       DateTime @updatedAt @map("updated_at") @db.DateTime
 
-  records     Record[]
-  milestones  UserMilestone[]
+  records      Record[]
+  breakSessions BreakSession[]
+  milestones   UserMilestone[]
 
   @@index([userId], name: "idx_user_id")
   @@index([relStatus], name: "idx_rel_status")
   @@map("t_relationships")
 }
 
+// ============ 断联期表（一段感情可有多段分手） ============
+model BreakSession {
+  sessionId   String   @id @map("session_id") @db.VarChar(12)
+  relId       String   @map("rel_id") @db.VarChar(6)
+  userId      BigInt   @map("user_id")
+  initiator   String   @default("self") @map("initiator") @db.VarChar(10)
+  startDate   DateTime @map("start_date") @db.Date
+  endDate     DateTime? @map("end_date") @db.Date
+  targetDays  Int      @default(100) @map("target_days")
+  status      String   @default("active") @map("status") @db.VarChar(20)
+  note        String?  @map("note") @db.VarChar(500)
+  createdAt   DateTime @default(now()) @map("created_at") @db.DateTime
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.DateTime
+
+  relationship Relationship @relation(fields: [relId], references: [relId])
+  records      Record[]
+
+  @@index([relId], name: "idx_session_rel_id")
+  @@index([userId], name: "idx_session_user_id")
+  @@map("t_break_sessions")
+}
+
 // ============ 断联记录表 ============
 model Record {
   recordId    Int      @id @default(autoincrement()) @map("record_id")
   relId       String   @map("rel_id") @db.VarChar(6)
+  sessionId   String?  @map("session_id") @db.VarChar(12)
   userId      BigInt   @map("user_id")
   recordDate  DateTime @map("record_date") @db.Date
   recMood     String   @map("rec_mood") @db.VarChar(20)
@@ -296,11 +320,13 @@ model Record {
   createdAt   DateTime @default(now()) @map("created_at") @db.DateTime
   updatedAt   DateTime @updatedAt @map("updated_at") @db.DateTime
 
-  relationship Relationship @relation(fields: [relId], references: [relId])
+  relationship  Relationship  @relation(fields: [relId], references: [relId])
+  breakSession  BreakSession? @relation(fields: [sessionId], references: [sessionId])
 
   @@unique([relId, recordDate], name: "uk_rel_date")
   @@index([userId], name: "idx_user_id")
   @@index([relId], name: "idx_rel_id")
+  @@index([sessionId], name: "idx_record_session_id")
   @@map("t_records")
 }
 
