@@ -155,8 +155,9 @@ docker run -d \
 │   ├── logs/               # Nginx 访问/错误日志
 │   ├── html/               # 静态文件
 │   └── ssl/                # SSL 证书
-├── helper-api-service/     # deploy.ps1 自动管理
+├── helper-api-service/     # deploy.sh 自动管理
 │   ├── logs/
-│   └── data/
+│   ├── data/
+│   └── uploads/            # 上传的图片文件（容器内外共享）
 
 ```

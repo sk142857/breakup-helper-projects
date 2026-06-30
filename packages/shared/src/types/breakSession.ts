@@ -21,7 +21,7 @@ export type Initiator = keyof typeof InitiatorDict
 /** 创建断联期请求 */
 export const BreakSessionCreateSchema = z.object({
   relId: z.string().min(1, '关联感情不能为空'),
-  startDate: z.string().min(1, '开始日期不能为空'),
+  startDate: z.string().min(1, '开始日期不能为空').refine(d => !isNaN(new Date(d).getTime()), '开始日期格式无效'),
   initiator: z.enum(['self', 'other']).optional().default('self'),
   targetDays: z.number().int().min(1).max(9999).optional().default(100),
   note: z.string().max(500).optional().nullable().or(z.literal('')),

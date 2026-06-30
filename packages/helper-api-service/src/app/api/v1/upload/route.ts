@@ -1,6 +1,6 @@
 import { NextRequest } from 'next/server'
-import { writeFile, mkdir } from 'fs/promises'
-import { existsSync } from 'fs'
+import { writeFile, mkdir, access } from 'fs/promises'
+import { existsSync, constants } from 'fs'
 import path from 'path'
 import crypto from 'crypto'
 import { prisma } from '@/lib/prisma'
@@ -21,10 +21,15 @@ export async function POST(req: NextRequest) {
   if ('error' in guard) return guard.error
   const { userId } = guard.ctx
 
+  console.log('[上传] 开始上传, userId:', userId.toString())
+  console.log('[上传] UPLOADS_ROOT:', UPLOADS_ROOT)
+  console.log('[上传] process.cwd():', process.cwd())
+
   let formData: FormData
   try {
     formData = await req.formData()
-  } catch {
+  } catch (e) {
+    console.error('[上传] 解析 formData 失败:', e)
     return fail(ErrorCode.BAD_REQUEST, '请求格式错误')
   }
 
@@ -32,6 +37,8 @@ export async function POST(req: NextRequest) {
   if (!file) return fail(ErrorCode.BAD_REQUEST, '请选择文件')
   if (!ALLOWED_IMAGE_TYPES.includes(file.type)) return fail(ErrorCode.INVALID_FILE_TYPE, '不支持的文件类型')
   if (file.size > MAX_FILE_SIZE) return fail(ErrorCode.FILE_TOO_LARGE, '文件超过10MB')
+
+  console.log('[上传] 文件信息:', { name: file.name, size: file.size, type: file.type })
 
   const mode = (formData.get('mode') as string) || 'both'
   const bizType = (formData.get('bizType') as string) || 'common'
@@ -48,9 +55,31 @@ export async function POST(req: NextRequest) {
   const origPath = path.join(storeDir, origFileName)
   const thumbPath = path.join(storeDir, thumbFileName)
 
-  if (!existsSync(storeDir)) await mkdir(storeDir, { recursive: true })
+  console.log('[上传] 存储路径:', { storeDir, origPath, thumbPath })
 
-  await writeFile(origPath, buffer)
+  // 创建目录
+  if (!existsSync(storeDir)) {
+    console.log('[上传] 创建目录:', storeDir)
+    await mkdir(storeDir, { recursive: true })
+  }
+
+  // 写入原图
+  try {
+    await writeFile(origPath, buffer)
+    console.log('[上传] writeFile 完成:', origPath)
+  } catch (e) {
+    console.error('[上传] 原图写入失败:', e)
+    return fail(ErrorCode.UPLOAD_FAILED, '文件写入磁盘失败')
+  }
+
+  // 验证文件是否真实写入
+  try {
+    await access(origPath, constants.F_OK)
+    console.log('[上传] 文件验证通过:', origPath)
+  } catch (e) {
+    console.error('[上传] 文件验证失败，文件未写入磁盘:', origPath, e)
+    return fail(ErrorCode.UPLOAD_FAILED, '文件写入磁盘后验证失败')
+  }
 
   let origUrl = `${baseUrl}/uploads/images/${bizType}/${dateStr}/${origFileName}`
   let thumbUrl: string | null = null
@@ -59,9 +88,15 @@ export async function POST(req: NextRequest) {
     try {
       const sharp = (await import('sharp')).default
       const thumbBuffer = await sharp(buffer).resize(300, 300, { fit: 'cover', position: 'center' }).jpeg({ quality: 80 }).toBuffer()
+      console.log('[上传] 缩略图生成完成, size:', thumbBuffer.length)
       await writeFile(thumbPath, thumbBuffer)
+      console.log('[上传] 缩略图写入完成:', thumbPath)
+      // 验证缩略图
+      await access(thumbPath, constants.F_OK)
+      console.log('[上传] 缩略图验证通过')
       thumbUrl = `${baseUrl}/uploads/images/${bizType}/${dateStr}/${thumbFileName}`
-    } catch {
+    } catch (e) {
+      console.error('[上传] 缩略图处理失败:', e)
       if (mode === 'thumbnail') { thumbUrl = origUrl; origUrl = `${baseUrl}/uploads/images/${bizType}/${dateStr}/${origFileName}` }
     }
   }
@@ -70,11 +105,14 @@ export async function POST(req: NextRequest) {
 
   try {
     const fileId = crypto.randomBytes(8).toString('hex')
+    console.log('[上传] 写入数据库, fileId:', fileId)
     const record = await prisma.fileUpload.create({
       data: { fileId, userId: BigInt(userId), fileName: file.name, fileSize: file.size, mimeType: file.type, fileType: 'image', storage: 'local', origUrl, thumbUrl, md5Hash: hash },
     })
+    console.log('[上传] 成功:', { fileId: record.fileId, origUrl: record.origUrl })
     return ok({ fileId: record.fileId, fileName: record.fileName, fileSize: record.fileSize, mimeType: record.mimeType, origUrl: record.origUrl, thumbUrl: record.thumbUrl }, '上传成功')
-  } catch {
+  } catch (e) {
+    console.error('[上传] 数据库记录保存失败:', e)
     return fail(ErrorCode.UPLOAD_FAILED, '上传记录保存失败')
   }
 }

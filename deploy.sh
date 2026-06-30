@@ -47,11 +47,19 @@ IMAGE_ADMIN="$REGISTRY/$NAMESPACE/helper-admin-pro:$TAG"
 HOME_API="$DOCKER_HOME/helper-api-service"
 HOME_ADMIN="$DOCKER_HOME/helper-admin-pro"
 
+# ===== 宿主机数据目录（只读保护） =====
+# ⚠️ 宿主机挂载目录不可删除！
+# uploads/ 存放用户上传图片，删除将导致生产数据永久丢失。
+# 以下 readonly 防止脚本后续误操作覆盖路径变量。
+readonly HOME_API HOME_ADMIN DOCKER_HOME
+readonly HOME_API_UPLOADS="${HOME_API}/uploads"
+
 # ============================================
-# 停止 & 清理
+# 停止 & 清理（仅容器/网络，绝不删宿主机目录）
 # ============================================
 if $DO_DOWN; then
     echo -e "${YELLOW}Stopping all containers...${NC}"
+    echo -e "${YELLOW}[安全] 宿主机目录保持不变: ${HOME_API}/uploads${NC}"
     docker stop helper-api-service helper-admin-pro helper-redis 2>/dev/null || true
     docker rm helper-api-service helper-admin-pro helper-redis 2>/dev/null || true
     docker network rm "$NETWORK" 2>/dev/null || true
@@ -87,7 +95,7 @@ docker pull "$IMAGE_ADMIN"
 
 # 2.5. 创建宿主机挂载目录
 echo -e "${CYAN}Creating host directories...${NC}"
-mkdir -p "$HOME_API/logs" "$HOME_API/data"
+mkdir -p "$HOME_API/logs" "$HOME_API/data" "$HOME_API/uploads/images"
 mkdir -p "$HOME_ADMIN/logs"
 
 # 3. 前置检查：Redis 必须已存在
@@ -109,6 +117,7 @@ docker run -d \
     -p 3000:3000 \
     -v "${HOME_API}/logs:/app/logs" \
     -v "${HOME_API}/data:/app/data" \
+    -v "${HOME_API}/uploads:/app/uploads" \
     "$IMAGE_API"
 
 # 5. Admin 前端

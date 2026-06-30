@@ -1,46 +1,96 @@
 <!-- 断联记录列表页 -->
-<t-navbar title="张三 · 断联记录" fixed left-arrow placeholder></t-navbar>
+<t-navbar title="{{nickname || '断联记录'}} · 记录" fixed left-arrow placeholder bind:left-arrow="onBack"></t-navbar>
 <scroll-view type="custom" scroll-y class="page-scroll">
   <view class="page-container">
 
-    <!-- 统计条 -->
-    <view class="summary-bar">
-      <text class="summary-text">共 <text class="summary-num">{{total}}</text> 条记录</text>
+    <!-- ===== 感情档案卡片（iOS 风格） ===== -->
+    <view wx:if="{{nickname}}" class="rec-profile-card">
+      <!-- 头部：头像 + 昵称 + 类型 -->
+      <view class="rec-profile-header">
+        <view class="rec-profile-avatar">
+          <image wx:if="{{avatarUrl}}" src="{{avatarUrl}}" mode="aspectFill" class="rec-profile-avatar-img" />
+          <view wx:else class="rec-profile-avatar-placeholder {{'rec-avatar-bg-' + (relType || 'other')}}">
+            <text class="rec-profile-avatar-char">{{_avatarChar}}</text>
+          </view>
+        </view>
+        <view class="rec-profile-header-right">
+          <text class="rec-profile-name">{{nickname}}</text>
+          <text class="rec-profile-type">{{_relTypeEmoji}} {{_relTypeLabel}}</text>
+        </view>
+      </view>
+
+      <!-- 统计信息 -->
+      <view class="rec-profile-stats">
+        <view class="rec-stats-item">
+          <text class="rec-stats-num">{{total}}</text>
+          <text class="rec-stats-label">记录</text>
+        </view>
+        <view class="rec-stats-divider"></view>
+        <view class="rec-stats-item">
+          <text class="rec-stats-num">{{_durationText || '--'}}</text>
+          <text class="rec-stats-label">持续</text>
+        </view>
+      </view>
     </view>
 
-    <!-- 记录列表 -->
+    <!-- ===== 记录列表 ===== -->
     <view class="records-list">
-      <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
+      <!-- 加载骨架 -->
+      <view wx:if="{{loading && records.length === 0}}" class="record-skeleton">
+        <view wx:for="{{[1,2,3]}}" wx:key="*this" class="skeleton-card">
+          <view class="skeleton-line skeleton-line-short"></view>
+          <view class="skeleton-line skeleton-line-long"></view>
+          <view class="skeleton-line skeleton-line-medium"></view>
+        </view>
+      </view>
+
+      <!-- 记录卡片 -->
       <block wx:for="{{records}}" wx:key="recordId">
-      <view class="record-card">
-        <view class="record-top flex-between">
-          <view class="record-header flex-row">
-            <view class="record-dot record-dot-primary"></view>
-            <text class="record-date">{{item.recordDate}}</text>
+      <view class="rec-card">
+        <!-- 卡片顶部：日期 + 第N天 + 删除 -->
+        <view class="rec-card-top">
+          <view class="rec-card-header">
+            <view class="rec-date-dot rec-date-dot-{{item.recMood || 'default'}}"></view>
+            <text class="rec-card-date">{{item.recordDate}}</text>
+            <text wx:if="{{item._sessionDay > 0}}" class="rec-card-day">第{{item._sessionDay}}天</text>
           </view>
-          <view class="record-delete" data-id="{{item.recordId}}" bindtap="onDeleteRecord">
-            <t-icon name="delete" size="28rpx" color="#C7C7CC" />
-          </view>
-        </view>
-        <view class="record-body">
-          <view class="flex-row mb-16">
-            <view wx:if="{{item.recBkStatusLabel}}" class="tag tag-primary">{{item.recBkStatusLabel}}</view>
-          </view>
-          <text wx:if="{{item.content}}" class="record-text">{{item.content}}</text>
-          <view wx:if="{{item.imageList && item.imageList.length > 0}}" class="record-images">
-            <image wx:for="{{item.imageList}}" wx:key="fileId" class="record-img" src="{{item.thumbUrl || item.origUrl}}" mode="aspectFill" />
-          </view>
-          <view wx:elif="{{item.images && item.images.length > 0}}" class="record-images">
-            <image wx:for="{{item.images}}" wx:key="*this" class="record-img" src="{{item}}" mode="aspectFill" />
+          <view class="rec-card-actions">
+            <view class="rec-card-btn" data-id="{{item.recordId}}" catchtap="onDeleteRecord">
+              <t-icon name="delete" size="28rpx" color="#C7C7CC" />
+            </view>
           </view>
         </view>
-        <!-- 底部 Emoji 展示 -->
-        <view class="record-emoji-bar">
-          <text class="record-emoji">{{item.recMoodEmoji}}</text>
+
+        <!-- 卡片内容 -->
+        <view class="rec-card-body">
+          <!-- 状态标签 + 情绪 -->
+          <view class="rec-card-meta">
+            <view wx:if="{{item.recBkStatusLabel}}" class="rec-tag rec-tag-{{item.recBkStatus || 'keeping'}}">{{item.recBkStatusLabel}}</view>
+            <text class="rec-card-emoji">{{item.recMoodEmoji}}</text>
+          </view>
+
+          <!-- 文字内容 -->
+          <text wx:if="{{item.content}}" class="rec-card-text">{{item.content}}</text>
+
+          <!-- 图片墙（flex:1 三列，同列表页风格） -->
+          <view wx:if="{{item._displayImages && item._displayImages.length > 0}}" class="rec-card-images">
+            <view wx:for="{{item._displayImages}}" wx:for-item="img" wx:key="fileId" class="rec-img-item">
+              <image src="{{img.thumbUrl || img.origUrl}}" mode="aspectFill" class="rec-img-thumb" />
+              <view wx:if="{{item._imageMore && index === 2}}" class="rec-img-more">
+                <text class="rec-img-more-text">+{{item._imageMore}}</text>
+              </view>
+            </view>
+          </view>
+          <view wx:elif="{{item.images && item.images.length > 0 && (!item.imageList || item.imageList.length === 0)}}" class="rec-card-images">
+            <view wx:for="{{item.images}}" wx:key="*this" class="rec-img-item">
+              <image src="{{item}}" mode="aspectFill" class="rec-img-thumb" />
+            </view>
+          </view>
         </view>
       </view>
       </block>
 
+      <!-- 空状态 -->
       <view wx:if="{{records.length === 0 && !loading}}" class="empty-state">
         <t-icon name="file-text" size="80rpx" color="#ddd" />
         <text class="empty-title">暂无断联记录</text>

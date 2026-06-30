@@ -69,16 +69,13 @@
       </view>
     </view>
 
-    <!-- Step 2: 日期设置（picker-view 滚轮） -->
+    <!-- Step 2: 日期设置 -->
     <view class="step-card" wx:if="{{step === 2}}">
+      <!-- 持续天数（只读展示，根据开始日期实时计算至今/结束日期的跨度） -->
       <view class="form-item">
-        <view class="form-label">目标天数</view>
+        <view class="form-label">持续天数</view>
         <view class="form-row">
-          <text class="{{goalDaysText ? 'form-text' : 'form-placeholder'}}">{{goalDaysText || '请设置起止日期'}} 天</text>
-        </view>
-        <view wx:if="{{goalDays > 0}}" class="goal-hint">
-          <t-icon name="info-circle" size="28rpx" color="var(--primary)" />
-          <text>根据起止日期自动计算，共 {{goalDays}} 天</text>
+          <text class="{{durationText ? 'form-text' : 'form-placeholder'}}">{{durationText || '请先选择开始日期'}}</text>
         </view>
       </view>
       <view class="form-item">
@@ -87,6 +84,19 @@
           <text class="{{startDate ? 'form-text' : 'form-placeholder'}}">{{startDate || '请选择开始日期'}}</text>
           <text class="picker-arrow">▾</text>
         </view>
+      </view>
+      <view hidden="{{!showStartPicker}}" class="date-picker-wrap">
+        <picker-view indicator-style="height: 80rpx;" style="width: 100%; height: 300rpx;" value="{{startDateIndex}}" bindchange="onStartDatePickerChange">
+          <picker-view-column>
+            <view wx:for="{{years}}" wx:key="*this" class="picker-item">{{item}}年</view>
+          </picker-view-column>
+          <picker-view-column>
+            <view wx:for="{{months}}" wx:key="*this" class="picker-item">{{item}}月</view>
+          </picker-view-column>
+          <picker-view-column>
+            <view wx:for="{{days}}" wx:key="*this" class="picker-item">{{item}}日</view>
+          </picker-view-column>
+        </picker-view>
       </view>
       <view class="form-item">
         <view class="form-label">结束日期（选填）</view>
@@ -98,22 +108,22 @@
           结束日期不能早于开始日期
         </view>
       </view>
-      <view wx:if="{{dateEditTarget}}" class="date-picker-wrap">
-        <picker-view indicator-style="height: 80rpx;" style="width: 100%; height: 300rpx;" value="{{dateEditTarget === 'start' ? startDateIndex : endDateIndex}}" bindchange="onDatePickerChange">
+      <view hidden="{{!showEndPicker}}" class="date-picker-wrap">
+        <picker-view indicator-style="height: 80rpx;" style="width: 100%; height: 300rpx;" value="{{endDateIndex}}" bindchange="onEndDatePickerChange">
           <picker-view-column>
-            <block wx:for="{{years}}" wx:key="*this"><view class="picker-item">{{item}}年</view></block>
+            <view wx:for="{{years}}" wx:key="*this" class="picker-item">{{item}}年</view>
           </picker-view-column>
           <picker-view-column>
-            <block wx:for="{{months}}" wx:key="*this"><view class="picker-item">{{item}}月</view></block>
+            <view wx:for="{{months}}" wx:key="*this" class="picker-item">{{item}}月</view>
           </picker-view-column>
           <picker-view-column>
-            <block wx:for="{{days}}" wx:key="*this"><view class="picker-item">{{item}}日</view></block>
+            <view wx:for="{{days}}" wx:key="*this" class="picker-item">{{item}}日</view>
           </picker-view-column>
         </picker-view>
       </view>
     </view>
 
-    <!-- Step 3: 当前状态（小卡片选项，不弹 picker） -->
+    <!-- Step 3: 当前状态 -->
     <view class="step-card" wx:if="{{step === 3}}">
       <view class="form-item">
         <view class="form-label" style="display:none;">当前状态</view>
@@ -133,7 +143,7 @@
       </view>
     </view>
 
-    <!-- Step 4: 备注图片（独立步骤，九宫格布局最多 9 张） -->
+    <!-- Step 4: 备注图片 -->
     <view class="step-card" wx:if="{{step === 4}}">
       <view class="form-item">
         <view class="form-label">备注（可选）</view>
@@ -142,27 +152,23 @@
         </view>
       </view>
       <view class="form-item">
-        <view class="form-label">图片（可选）</view>
+        <view class="form-label">图片（可选，最多9张）</view>
         <view class="upload-grid">
-          <block wx:for="{{slots}}" wx:key="*this">
-            <view class="upload-item">
-              <view class="upload-spacer"></view>
-              <view class="upload-inner">
-                <block wx:if="{{imageUrls[item] || images[item]}}">
-                  <image class="upload-img" src="{{imageUrls[item] || images[item]}}" mode="aspectFill" />
-                  <view class="upload-delete" data-index="{{item}}" catchtap="onDelImage">
-                    <t-icon name="close-circle-filled" size="36rpx" color="#FF3B30" />
-                  </view>
-                </block>
-                <view wx:elif="{{item === 0}}" class="upload-add" bindtap="onChooseImage" data-index="{{item}}">
-                  <t-icon name="add" size="56rpx" color="#ccc" />
-                </view>
-                <view wx:else class="upload-placeholder" bindtap="onChooseImage" data-index="{{item}}">
-                  <t-icon name="image" size="48rpx" color="#ccc" />
-                </view>
+          <view wx:for="{{imageUrls}}" wx:key="*this" class="upload-item">
+            <view class="upload-spacer"></view>
+            <view class="upload-inner">
+              <image class="upload-img" src="{{item}}" mode="aspectFill" />
+              <view class="upload-delete" data-index="{{index}}" catchtap="onDelImage">
+                <t-icon name="close-circle-filled" size="36rpx" color="#FF3B30" />
               </view>
             </view>
-          </block>
+          </view>
+          <view wx:if="{{imageUrls.length < 9}}" class="upload-item" bindtap="onChooseImage">
+            <view class="upload-spacer"></view>
+            <view class="upload-inner upload-add">
+              <t-icon name="add" size="56rpx" color="#ccc" />
+            </view>
+          </view>
         </view>
       </view>
     </view>

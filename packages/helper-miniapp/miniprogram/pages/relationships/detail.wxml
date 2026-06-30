@@ -53,6 +53,7 @@
             <t-icon wx:if="{{currentSessionId === item.sessionId}}" name="check-circle-filled" size="28rpx" color="#f6685d" />
           </view>
         </view>
+        </block>
       </scroll-view>
       <view class="session-actions">
         <view class="session-action-btn" bindtap="onNewBreakSession">

@@ -15,7 +15,10 @@ export interface RecordInfo {
   userId: number
   recordDate: string
   recMood: string
+  recMoodLabel: string
+  recMoodEmoji: string
   recBkStatus: string | null
+  recBkStatusLabel: string | null
   content: string | null
   images: string[]
   imageList: ImageInfo[]

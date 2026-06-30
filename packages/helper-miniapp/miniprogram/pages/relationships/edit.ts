@@ -19,8 +19,7 @@ Component({
     ],
     startDate: '',
     endDate: '',
-    goalDays: 0,
-    goalDaysText: '',
+    durationText: '',
     today: '',
     status: 'active',
     statusOptions: [
@@ -33,7 +32,6 @@ Component({
     images: [] as string[],
     /** 用于 WXML 预览的图片 URL（与 images 下标对齐） */
     imageUrls: [] as string[],
-    slots: [0, 1, 2, 3, 4, 5],
     saving: false,
     // picker-view 日期
     years: [] as number[],
@@ -41,7 +39,8 @@ Component({
     days: [] as number[],
     startDateIndex: [0, 0, 0] as number[],
     endDateIndex: [0, 0, 0] as number[],
-    dateEditTarget: '' as 'start' | 'end' | '',
+    showStartPicker: false,
+    showEndPicker: false,
   },
   methods: {
     onPrevStep() {
@@ -109,24 +108,36 @@ Component({
       this.setData({ status: e.currentTarget.dataset.value });
     },
     onTapStartDate() {
-      this.setData({ dateEditTarget: 'start' });
+      this.setData({ showStartPicker: true, showEndPicker: false });
     },
     onTapEndDate() {
-      this.setData({ dateEditTarget: 'end' });
+      this.setData({ showEndPicker: true, showStartPicker: false });
     },
-    onDatePickerChange(e: WechatMiniprogram.PickerChange) {
+    onStartDatePickerChange(e: WechatMiniprogram.PickerChange) {
       const val = e.detail.value as number[];
       const [yIdx, mIdx, dIdx] = val;
       const y = this.data.years[yIdx];
       const m = this.data.months[mIdx];
       const d = this.data.days[dIdx];
       const dateStr = [y, String(m).padStart(2, '0'), String(d).padStart(2, '0')].join('-');
-
-      if (this.data.dateEditTarget === 'start') {
-        this.setData({ startDate: dateStr, startDateIndex: val, endDate: this.data.endDate && this.data.endDate < dateStr ? '' : this.data.endDate }, () => this.calcGoalDays());
-      } else {
-        this.setData({ endDate: dateStr, endDateIndex: val }, () => this.calcGoalDays());
-      }
+      // 选择开始日期时，如果已有结束日期且早于新开始日期，则清空结束日期
+      this.setData({
+        startDate: dateStr,
+        startDateIndex: val,
+        endDate: this.data.endDate && this.data.endDate < dateStr ? '' : this.data.endDate,
+      }, () => this.calcDuration());
+    },
+    onEndDatePickerChange(e: WechatMiniprogram.PickerChange) {
+      const val = e.detail.value as number[];
+      const [yIdx, mIdx, dIdx] = val;
+      const y = this.data.years[yIdx];
+      const m = this.data.months[mIdx];
+      const d = this.data.days[dIdx];
+      const dateStr = [y, String(m).padStart(2, '0'), String(d).padStart(2, '0')].join('-');
+      this.setData({
+        endDate: dateStr,
+        endDateIndex: val,
+      }, () => this.calcDuration());
     },
     initDatePicker(baseDate?: string) {
       const d = baseDate ? new Date(baseDate.replace(/-/g, '/')) : new Date();
@@ -145,40 +156,87 @@ Component({
       const yIdx = this.data.years.indexOf(y);
       return [yIdx >= 0 ? yIdx : this.data.years.length - 1, Math.max(0, m - 1), Math.max(0, d - 1)];
     },
-    calcGoalDays() {
+    /** 计算格式化持续天数，例如 "3年4个月23天"、"2个月09天"、"15天" */
+    calcDuration() {
       const { startDate, endDate } = this.data;
       if (!startDate) {
-        this.setData({ goalDays: 0, goalDaysText: '' });
+        this.setData({ durationText: '' });
         return;
       }
       const start = new Date(startDate.replace(/-/g, '/'));
       const end = endDate ? new Date(endDate.replace(/-/g, '/')) : new Date();
       if (isNaN(start.getTime()) || isNaN(end.getTime())) return;
-      const diff = Math.max(0, Math.ceil((end.getTime() - start.getTime()) / 86400000));
-      this.setData({ goalDays: diff, goalDaysText: String(diff) });
+
+      let years = end.getFullYear() - start.getFullYear();
+      let months = end.getMonth() - start.getMonth();
+      let days = end.getDate() - start.getDate();
+
+      if (days < 0) {
+        months--;
+        const prevMonth = new Date(end.getFullYear(), end.getMonth(), 0);
+        days += prevMonth.getDate();
+      }
+      if (months < 0) {
+        years--;
+        months += 12;
+      }
+
+      const parts: string[] = [];
+      if (years > 0) parts.push(`${years}年`);
+      if (months > 0) parts.push(`${months}个月`);
+      parts.push(`${String(days).padStart(2, '0')}天`);
+
+      this.setData({ durationText: parts.join('') });
+    },
+    /** 将总天数转换为中文格式 "X年X个月X天" */
+    formatDaysDuration(totalDays: number): string {
+      if (totalDays <= 0) return '';
+      const years = Math.floor(totalDays / 365);
+      const remainingAfterYears = totalDays % 365;
+      const months = Math.floor(remainingAfterYears / 30);
+      const days = remainingAfterYears % 30;
+      const parts: string[] = [];
+      if (years > 0) parts.push(`${years}年`);
+      if (months > 0) parts.push(`${months}个月`);
+      parts.push(`${String(days).padStart(2, '0')}天`);
+      return parts.join('');
     },
     onNoteChange(e: WechatMiniprogram.CustomEvent) {
       this.setData({ note: e.detail.value });
     },
-    onChooseImage(e: WechatMiniprogram.TouchEvent) {
-      const idx = Number(e.currentTarget.dataset.index);
+    onChooseImage() {
+      const currentCount = this.data.imageUrls.length;
+      const remaining = 9 - currentCount;
+      if (remaining <= 0) return;
+
       const that = this;
       wx.chooseMedia({
-        count: 1,
+        count: remaining,
         mediaType: ['image'],
         sizeType: ['compressed'],
         success: async (res) => {
           wx.showLoading({ title: '上传中...' });
           try {
-            const upRes = await uploadFile(res.tempFiles[0].tempFilePath, 'both', 'relationship');
-            if (upRes.code === 0) {
-              const images = [...that.data.images];
-              const imageUrls = [...that.data.imageUrls];
-              images[idx] = upRes.data.fileId;
-              imageUrls[idx] = upRes.data.thumbUrl || upRes.data.origUrl;
-              that.setData({ images, imageUrls });
+            const uploadPromises = res.tempFiles.map(f => uploadFile(f.tempFilePath, 'both', 'relationship'));
+            const results = await Promise.all(uploadPromises);
+
+            const images = [...that.data.images];
+            const imageUrls = [...that.data.imageUrls];
+
+            for (const upRes of results) {
+              if (upRes.code === 0) {
+                images.push(upRes.data.fileId);
+                imageUrls.push(upRes.data.thumbUrl || upRes.data.origUrl);
+              }
+            }
+
+            that.setData({ images, imageUrls });
+
+            const failCount = results.filter(r => r.code !== 0).length;
+            if (failCount > 0) {
+              wx.showToast({ title: `${failCount} 张图片上传失败`, icon: 'none' });
             } else {
-              wx.showToast({ title: upRes.message || '上传失败', icon: 'none' });
+              wx.hideLoading();
             }
           } catch (e) {
             wx.showToast({ title: (e as Error).message || '上传失败', icon: 'none' });
@@ -192,8 +250,8 @@ Component({
       const idx = Number(e.currentTarget.dataset.index);
       const images = [...this.data.images];
       const imageUrls = [...this.data.imageUrls];
-      images[idx] = '';
-      imageUrls[idx] = '';
+      images.splice(idx, 1);
+      imageUrls.splice(idx, 1);
       this.setData({ images, imageUrls });
     },
     async loadEditData(id: string) {
@@ -211,8 +269,7 @@ Component({
             typeValue: d.relType,
             startDate: d.startDate,
             endDate: d.endDate || '',
-            goalDays: d.breakTargetDays,
-            goalDaysText: String(d.breakTargetDays),
+            durationText: d.breakTargetDays ? this.formatDaysDuration(d.breakTargetDays) : '',
             status: d.relStatus,
             note: d.note || '',
             images: d.images || [],
@@ -242,13 +299,23 @@ Component({
         const avatarUrl = this.data.avatarUrl;
         const imageIds = this.data.images.filter(Boolean);
 
+        // 计算持续天数（从开始日期到结束日期或至今）
+        let breakTargetDays: number | undefined;
+        if (this.data.startDate) {
+          const start = new Date(this.data.startDate.replace(/-/g, '/'));
+          const end = this.data.endDate ? new Date(this.data.endDate.replace(/-/g, '/')) : new Date();
+          if (!isNaN(start.getTime()) && !isNaN(end.getTime())) {
+            breakTargetDays = Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000));
+          }
+        }
+
         const payload = {
           nickname: this.data.name.trim(),
           avatarUrl: avatarUrl || undefined,
           relType: this.data.typeValue,
           startDate: this.data.startDate,
           endDate: this.data.endDate || undefined,
-          breakTargetDays: this.data.goalDays > 0 ? this.data.goalDays : undefined,
+          breakTargetDays,
           relStatus: this.data.status,
           note: this.data.note || undefined,
           images: imageIds.length > 0 ? imageIds : undefined,
@@ -289,9 +356,10 @@ Component({
       this.initDatePicker(today);
       const defaultIdx = this.data.years.length - 1;
       this.setData({
+        startDate: today,
         startDateIndex: [defaultIdx, d.getMonth(), d.getDate() - 1],
         endDateIndex: [defaultIdx, d.getMonth(), d.getDate() - 1],
-      });
+      }, () => this.calcDuration());
 
       // 编辑模式：加载已有数据
       const id = this.data.id || '';

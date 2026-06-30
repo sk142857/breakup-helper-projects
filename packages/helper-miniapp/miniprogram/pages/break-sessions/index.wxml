@@ -3,25 +3,79 @@
 <scroll-view type="custom" scroll-y class="page-scroll">
   <view class="page-container">
 
-    <!-- 感情档案摘要 -->
+    <!-- 感情档案摘要（iOS 卡片风格） -->
     <view class="profile-card">
-      <view class="profile-avatar">
-        <view wx:if="{{avatarUrl}}" class="avatar-circle-sm">
-          <image src="{{avatarUrl}}" mode="aspectFill" class="avatar-preview-sm" />
+      <!-- 右上：删除 -->
+      <view class="profile-btn-top" catchtap="onDeleteRelation">
+        <t-icon name="delete" size="32rpx" color="#C7C7CC" />
+      </view>
+      <!-- 右下：修改 -->
+      <view class="profile-btn-bottom" catchtap="onEditRelation">
+        <t-icon name="edit-1" size="32rpx" color="#C7C7CC" />
+      </view>
+
+      <!-- 头部：头像 + 昵称 + 类型 -->
+      <view class="profile-header">
+        <view class="profile-avatar">
+          <image wx:if="{{avatarUrl}}" src="{{avatarUrl}}" mode="aspectFill" class="profile-avatar-img" />
+          <view wx:else class="profile-avatar-placeholder {{'profile-avatar-bg-' + (relType || 'other')}}">
+            <text class="profile-avatar-char">{{_avatarChar}}</text>
+          </view>
         </view>
-        <view wx:else class="avatar-lg avatar-green">
-          <t-icon name="user" size="64rpx" color="#fff" />
+        <view class="profile-header-right">
+          <text class="profile-name">{{nickname}}</text>
+          <text class="profile-type">{{_relTypeEmoji}} {{_relTypeLabel}}</text>
         </view>
       </view>
-      <text class="profile-name">{{nickname}}</text>
-      <view class="profile-tags">
-        <view class="tag tag-primary">{{relTypeLabel}}</view>
-        <view class="tag {{relStatus === 'active' ? 'tag-warning' : relStatus === 'done' ? 'tag-success' : 'tag-default'}}">{{relStatusLabel}}</view>
+
+      <!-- 信息栏：状态 / 持续 / 断联 -->
+      <view class="profile-info">
+        <view class="profile-info-item">
+          <text class="profile-info-label">状态</text>
+          <text class="profile-info-value {{'profile-text-' + relStatus}}">{{relStatusLabel}}</text>
+        </view>
+        <view class="profile-info-divider"></view>
+        <view class="profile-info-item">
+          <text class="profile-info-label">持续</text>
+          <text class="profile-info-value profile-info-highlight">{{_durationText}}</text>
+        </view>
+        <view class="profile-info-divider"></view>
+        <view class="profile-info-item">
+          <text class="profile-info-label">断联</text>
+          <text class="profile-info-value">{{breakDays}} 天</text>
+        </view>
       </view>
+
+      <!-- 日期区间 -->
       <view class="profile-dates">
-        <text>{{startDate}}</text>
-        <t-icon wx:if="{{endDate}}" name="arrow-right" size="28rpx" color="#ccc" />
-        <text wx:if="{{endDate}}"> ~ {{endDate}}</text>
+        <text class="profile-date-text">{{startDate}}</text>
+        <text wx:if="{{endDate}}" class="profile-date-arrow">→</text>
+        <text wx:if="{{endDate}}" class="profile-date-text">{{endDate}}</text>
+      </view>
+
+      <!-- 进度条 -->
+      <view class="profile-progress">
+        <view class="profile-progress-track">
+          <view class="profile-progress-fill {{'profile-progress-' + relStatus}}" style="width: {{Math.min(breakDays / Math.max(breakTargetDays, 1) * 100, 100)}}%;"></view>
+        </view>
+        <view class="profile-progress-bottom">
+          <text class="profile-progress-label">{{breakDays}} / {{breakTargetDays}} 天</text>
+        </view>
+      </view>
+
+      <!-- 备注 -->
+      <view wx:if="{{note}}" class="profile-note">
+        <text class="profile-note-text">{{note}}</text>
+      </view>
+
+      <!-- 图片墙 -->
+      <view wx:if="{{_displayImages && _displayImages.length > 0}}" class="profile-images">
+        <view wx:for="{{_displayImages}}" wx:for-item="img" wx:key="fileId" class="profile-img-item">
+          <image src="{{img.thumbUrl || img.origUrl}}" mode="aspectFill" class="profile-img-thumb" />
+          <view wx:if="{{_imageMore && index === 2}}" class="profile-img-more">
+            <text class="profile-img-more-text">+{{_imageMore}}</text>
+          </view>
+        </view>
       </view>
     </view>
 
@@ -65,7 +119,7 @@
             </view>
           </view>
           <view class="session-delete-btn" data-session-id="{{item.sessionId}}" catchtap="onDeleteSession">
-            <t-icon name="delete" size="28rpx" color="#C7C7CC" />
+            <t-icon name="delete" size="32rpx" color="#C7C7CC" />
           </view>
         </view>
 

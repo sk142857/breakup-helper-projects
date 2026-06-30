@@ -8,18 +8,9 @@ import { resolveImageList } from '@/lib/image'
 import { ErrorCode } from '@app/shared/constants'
 
 /**
- * 计算断联持续天数
- */
-function calcBreakDays(startDate: Date, endDate: Date | null): number {
-  const end = endDate || new Date()
-  const diff = end.getTime() - startDate.getTime()
-  return Math.max(0, Math.ceil(diff / 86400000))
-}
-
-/**
  * 序列化关系对象
  */
-function serializeRel(rel: Record<string, unknown>): RelationshipInfo {
+function serializeRel(rel: Record<string, unknown>, recordCount = 0): RelationshipInfo {
   const startDate = rel.startDate as Date
   const endDate = rel.endDate as Date | null
   return {
@@ -35,7 +26,7 @@ function serializeRel(rel: Record<string, unknown>): RelationshipInfo {
     note: (rel.note as string) || null,
     images: (rel.images as string[]) || [],
     imageList: [],
-    breakDays: calcBreakDays(startDate, endDate),
+    breakDays: recordCount,
     createdAt: (rel.createdAt as Date).toISOString(),
     updatedAt: (rel.updatedAt as Date).toISOString(),
   }
@@ -47,9 +38,10 @@ function serializeRel(rel: Record<string, unknown>): RelationshipInfo {
 async function getRelationship(relId: string, userId: number) {
   const rel = await prisma.relationship.findFirst({
     where: { relId, userId: BigInt(userId) },
+    include: { _count: { select: { records: true } } },
   })
   if (!rel) return null
-  return serializeRel(rel as unknown as Record<string, unknown>)
+  return serializeRel(rel as unknown as Record<string, unknown>, rel._count.records)
 }
 
 /**

@@ -39,6 +39,26 @@ CREATE TABLE `t_staff`  (
 INSERT INTO `t_staff` VALUES (1, 'root', '$2a$10$E7vdJL/.y8NNGn3S4q9jGeWrHGbPQpf9Eyvr..AU6t5jEALNop2n6', '超级管理员', 'active', '2026-06-27 00:00:00', '2026-06-27 00:00:00');
 
 -- ----------------------------
+-- Table structure for app_clients
+-- ----------------------------
+DROP TABLE IF EXISTS `app_clients`;
+CREATE TABLE `app_clients`  (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '客户端名称',
+  `app_key` varchar(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'AppKey',
+  `app_secret` varchar(128) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT 'AppSecret',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active' COMMENT '状态: active|disabled',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`) USING BTREE,
+  UNIQUE INDEX `uk_app_key`(`app_key` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '第三方应用表（Open API 调用方）' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of app_clients
+-- ----------------------------
+
+-- ----------------------------
 -- Table structure for t_dict
 -- ----------------------------
 DROP TABLE IF EXISTS `t_dict`;
@@ -108,19 +128,25 @@ CREATE TABLE `t_milestones`  (
 -- Records of t_milestones
 -- ----------------------------
 INSERT INTO `t_milestones` VALUES (1, 1, '第一天', '🌱', 1);
-INSERT INTO `t_milestones` VALUES (2, 3, '三天坚持', '💪', 2);
-INSERT INTO `t_milestones` VALUES (3, 7, '一周之痒', '🎯', 3);
-INSERT INTO `t_milestones` VALUES (4, 14, '两周蜕变', '🦋', 4);
-INSERT INTO `t_milestones` VALUES (5, 21, '习惯养成', '🏃', 5);
-INSERT INTO `t_milestones` VALUES (6, 30, '满月纪念', '🌕', 6);
-INSERT INTO `t_milestones` VALUES (7, 50, '半百里程', '⛰️', 7);
-INSERT INTO `t_milestones` VALUES (8, 66, '顺顺利利', '🍀', 8);
-INSERT INTO `t_milestones` VALUES (9, 88, '发发发', '🎉', 9);
-INSERT INTO `t_milestones` VALUES (10, 100, '百天大关', '💯', 10);
-INSERT INTO `t_milestones` VALUES (11, 150, '破茧成蝶', '🌟', 11);
-INSERT INTO `t_milestones` VALUES (12, 200, '双百成就', '🏆', 12);
-INSERT INTO `t_milestones` VALUES (13, 300, '三百天王者', '👑', 13);
-INSERT INTO `t_milestones` VALUES (14, 365, '一周年重生', '🔥', 14);
+
+-- ----------------------------
+-- Table structure for t_user_milestones
+-- ----------------------------
+DROP TABLE IF EXISTS `t_user_milestones`;
+CREATE TABLE `t_user_milestones`  (
+  `um_id` int NOT NULL AUTO_INCREMENT,
+  `user_id` bigint NOT NULL COMMENT '所属用户 ID',
+  `rel_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '关联感情 ID',
+  `ms_id` int NOT NULL COMMENT '关联里程碑 ID',
+  `achieved_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '达成时间',
+  PRIMARY KEY (`um_id`) USING BTREE,
+  UNIQUE INDEX `uk_user_rel_ms`(`user_id` ASC, `rel_id` ASC, `ms_id` ASC) USING BTREE,
+  INDEX `idx_rel_id`(`rel_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户里程碑达成记录表' ROW_FORMAT = DYNAMIC;
+
+-- ----------------------------
+-- Records of t_user_milestones
+-- ----------------------------
 
 -- ----------------------------
 -- Table structure for t_records
@@ -128,7 +154,8 @@ INSERT INTO `t_milestones` VALUES (14, 365, '一周年重生', '🔥', 14);
 DROP TABLE IF EXISTS `t_records`;
 CREATE TABLE `t_records`  (
   `record_id` int NOT NULL AUTO_INCREMENT,
-  `rel_id` int NOT NULL COMMENT '关联感情 ID',
+  `rel_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '关联感情 ID',
+  `session_id` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '断联期 ID',
   `user_id` bigint NOT NULL COMMENT '所属用户 ID (冗余, 便于查询)',
   `record_date` date NOT NULL COMMENT '记录日期',
   `rec_mood` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '心情: great|good|ok|bad|terrible (打卡) 或 cry|sad|meh|happy|free|strong|heartbreak (详细)',
@@ -140,7 +167,8 @@ CREATE TABLE `t_records`  (
   PRIMARY KEY (`record_id`) USING BTREE,
   UNIQUE INDEX `uk_rel_date`(`rel_id` ASC, `record_date` ASC) USING BTREE,
   INDEX `idx_user_id`(`user_id` ASC) USING BTREE,
-  INDEX `idx_rel_id`(`rel_id` ASC) USING BTREE
+  INDEX `idx_rel_id`(`rel_id` ASC) USING BTREE,
+  INDEX `idx_record_session_id`(`session_id` ASC) USING BTREE
 ) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '断联记录表 (打卡 + 详细记录)' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
@@ -152,7 +180,7 @@ CREATE TABLE `t_records`  (
 -- ----------------------------
 DROP TABLE IF EXISTS `t_relationships`;
 CREATE TABLE `t_relationships`  (
-  `rel_id` int NOT NULL AUTO_INCREMENT,
+  `rel_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '感情关系ID',
   `user_id` bigint NOT NULL COMMENT '所属用户 ID',
   `nickname` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '对方昵称/代号',
   `avatar_url` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '头像 URL',
@@ -175,22 +203,28 @@ CREATE TABLE `t_relationships`  (
 -- ----------------------------
 
 -- ----------------------------
--- Table structure for t_user_milestones
+-- Table structure for t_break_sessions
 -- ----------------------------
-DROP TABLE IF EXISTS `t_user_milestones`;
-CREATE TABLE `t_user_milestones`  (
-  `um_id` int NOT NULL AUTO_INCREMENT,
-  `user_id` bigint NOT NULL,
-  `rel_id` int NOT NULL,
-  `ms_id` int NOT NULL,
-  `achieved_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '达成时间',
-  PRIMARY KEY (`um_id`) USING BTREE,
-  UNIQUE INDEX `uk_user_rel_ms`(`user_id` ASC, `rel_id` ASC, `ms_id` ASC) USING BTREE,
-  INDEX `idx_rel_id`(`rel_id` ASC) USING BTREE
-) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '用户里程碑达成记录' ROW_FORMAT = DYNAMIC;
+DROP TABLE IF EXISTS `t_break_sessions`;
+CREATE TABLE `t_break_sessions`  (
+  `session_id` varchar(12) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '断联期 ID',
+  `rel_id` varchar(6) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '关联感情 ID',
+  `user_id` bigint NOT NULL COMMENT '所属用户 ID',
+  `initiator` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'self' COMMENT '分手发起方: self|ex|mutual',
+  `start_date` date NOT NULL COMMENT '断联开始日期',
+  `end_date` date NULL DEFAULT NULL COMMENT '断联结束日期',
+  `target_days` int NOT NULL DEFAULT 100 COMMENT '断联目标天数',
+  `status` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'active' COMMENT '状态: active|done|aborted',
+  `note` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '备注',
+  `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`session_id`) USING BTREE,
+  INDEX `idx_session_rel_id`(`rel_id` ASC) USING BTREE,
+  INDEX `idx_session_user_id`(`user_id` ASC) USING BTREE
+) ENGINE = InnoDB CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci COMMENT = '断联期表（一段感情可有多段分手）' ROW_FORMAT = DYNAMIC;
 
 -- ----------------------------
--- Records of t_user_milestones
+-- Records of t_break_sessions
 -- ----------------------------
 
 -- ----------------------------

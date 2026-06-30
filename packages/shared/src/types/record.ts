@@ -35,7 +35,7 @@ export type BreakStatusCode = keyof typeof BreakStatusDict
 export const RecordCreateSchema = z.object({
   relId: z.string().min(1, '关联感情不能为空'),
   sessionId: z.string().optional().nullable(),
-  recordDate: z.string().min(1, '记录日期不能为空'),
+  recordDate: z.string().min(1, '记录日期不能为空').refine(d => !isNaN(new Date(d).getTime()), '记录日期格式无效'),
   recMood: z.string().min(1, '心情不能为空'),
   recBkStatus: z.string().optional().nullable(),
   content: z.string().max(2000).optional().nullable().or(z.literal('')),

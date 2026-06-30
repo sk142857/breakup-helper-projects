@@ -3,54 +3,90 @@
 <scroll-view type="custom" scroll-y class="page-scroll">
   <view class="page-container">
 
-    <!-- 分类标签 -->
-    <view class="filter-bar">
-      <view class="filter-item {{filterTab === 'all' ? 'filter-active' : ''}}" data-tab="all" bindtap="onFilter">
-        <text>全部</text>
-      </view>
-      <view class="filter-item {{filterTab === 'active' ? 'filter-active' : ''}}" data-tab="active" bindtap="onFilter">
-        <text>进行中</text>
-        <view class="filter-badge">2</view>
-      </view>
-      <view class="filter-item {{filterTab === 'done' ? 'filter-active' : ''}}" data-tab="done" bindtap="onFilter">
-        <text>已结束</text>
-        <view class="filter-badge filter-badge-done">1</view>
-      </view>
-    </view>
-
     <!-- 感情列表 -->
     <view class="list-wrap">
-      <!-- AI: block包装wx:for避免迭代器与元素属性冲突 -->
-      <block wx:for="{{list}}" wx:key="relId">
-      <view class="relation-card {{item.relStatus === 'done' ? 'relation-card-done' : ''}}" data-id="{{item.relId}}" bindtap="onTapItem">
-        <view class="card-header flex-between">
-          <view class="flex-row">
-            <view wx:if="{{item.avatarUrl}}" class="avatar">
-              <image src="{{item.avatarUrl}}" mode="aspectFill" style="width: 80rpx; height: 80rpx; border-radius: 50%;" />
-            </view>
-            <view wx:else class="avatar avatar-green">
-              <t-icon name="user" size="48rpx" color="#fff" />
-            </view>
-            <view class="card-header-info">
-              <text class="card-title">{{item.nickname}}</text>
-              <text class="card-subtitle">{{item.relTypeLabel}} · {{item.startDate}}</text>
+      <view wx:for="{{list}}" wx:key="relId" class="rel-card {{item.relStatus === 'done' ? 'rel-card-done' : ''}}" data-id="{{item.relId}}" bindtap="onTapItem">
+        <!-- 卡片顶部装饰区 -->
+        <view class="rel-card-cover {{'rel-cover-' + (item.relStatus === 'active' ? 'active' : item.relStatus === 'done' ? 'done' : 'paused')}}">
+          <view class="rel-card-avatar">
+            <image wx:if="{{item.avatarUrl}}" src="{{item.avatarUrl}}" mode="aspectFill" class="rel-avatar-img" />
+            <view wx:else class="rel-avatar-placeholder {{'rel-avatar-bg-' + (item.relType || 'other')}}">
+              <text class="rel-avatar-char">{{item._avatarChar}}</text>
             </view>
           </view>
-          <view class="tag {{item.relStatus === 'active' ? 'tag-warning' : item.relStatus === 'done' ? 'tag-success' : 'tag-default'}}">
-            {{item.relStatusLabel}}
+          <view class="rel-card-header-right">
+            <text class="rel-card-name">{{item.nickname}}</text>
+            <text class="rel-card-type">{{item._relTypeEmoji}} {{item._relTypeLabel}}</text>
+          </view>
+          <view class="rel-card-delete" data-id="{{item.relId}}" catchtap="onDeleteItem">
+            <t-icon name="delete" size="32rpx" color="#C7C7CC" />
           </view>
         </view>
-        <view class="card-body">
-          <view class="flex-between mb-16">
-            <text class="text-secondary">已断联 {{item.breakDays}} 天</text>
+
+        <!-- 卡片主体 -->
+        <view class="rel-card-body">
+
+          <!-- 状态 / 持续 / 断联 -->
+          <view class="rel-card-info">
+            <view class="rel-info-item">
+              <text class="rel-info-label">状态</text>
+              <text class="rel-info-value rel-info-status {{'rel-text-' + item.relStatus}}">{{item._relStatusLabel}}</text>
+            </view>
+            <view class="rel-info-divider"></view>
+            <view class="rel-info-item">
+              <text class="rel-info-label">持续</text>
+              <text class="rel-info-value rel-info-highlight">{{item._durationText}}</text>
+            </view>
+            <view class="rel-info-divider"></view>
+            <view class="rel-info-item">
+              <text class="rel-info-label">断联</text>
+              <text class="rel-info-value">{{item.breakDays}} 天</text>
+            </view>
           </view>
-          <view class="progress-wrap">
-            <t-progress percentage="{{Math.min(item.breakDays / item.breakTargetDays * 100, 100)}}" stroke-width="12rpx" color="{{item.relStatus === 'done' ? '#34C759' : '#f6685d'}}" track-color="#fde8e5" />
-            <text class="progress-hint">目标 {{item.breakTargetDays}} 天 · {{item.relStatus === 'done' ? '已达成 ✓' : '还剩 ' + (item.breakTargetDays > item.breakDays ? item.breakTargetDays - item.breakDays : 0) + ' 天'}}</text>
+
+          <!-- 日期区间 -->
+          <view class="rel-card-dates">
+            <text class="rel-date-text">{{item.startDate}}</text>
+            <text wx:if="{{item.endDate}}" class="rel-date-arrow">→</text>
+            <text wx:if="{{item.endDate}}" class="rel-date-text">{{item.endDate}}</text>
           </view>
+
+          <!-- 进度条 -->
+          <view class="rel-card-progress">
+            <view class="rel-progress-track">
+              <view class="rel-progress-fill {{'rel-progress-' + item.relStatus}}" style="width: {{Math.min(item.breakDays / Math.max(item.breakTargetDays, 1) * 100, 100)}}%;"></view>
+            </view>
+            <view class="rel-progress-bottom">
+              <text class="rel-progress-label">{{item.breakDays}} / {{item.breakTargetDays}} 天</text>
+              <text wx:if="{{item.relStatus !== 'done' && item.breakTargetDays > item.breakDays}}" class="rel-progress-remain">剩余 {{item.breakTargetDays - item.breakDays}} 天</text>
+              <text wx:elif="{{item.relStatus === 'done'}}" class="rel-progress-remain">✓ 已达成</text>
+              <text wx:else class="rel-progress-remain">已超期 {{item.breakDays - item.breakTargetDays}} 天</text>
+            </view>
+          </view>
+
+          <!-- 备注预览 -->
+          <view wx:if="{{item.note}}" class="rel-card-note">
+            <t-icon name="quote" size="24rpx" color="#ccc" />
+            <text class="rel-note-text">{{item.note}}</text>
+          </view>
+
+          <!-- 图片墙：独占一行，最多 6 张 -->
+          <view wx:if="{{item._displayImages.length}}" class="rel-card-images">
+            <view wx:for="{{item._displayImages}}" wx:for-item="img" wx:key="fileId" class="rel-img-item">
+              <image src="{{img.thumbUrl || img.origUrl}}" mode="aspectFill" class="rel-img-thumb" />
+              <!-- 第3张且有更多时显示 +N -->
+              <view wx:if="{{item._imageMore && index === 2}}" class="rel-img-more">
+                <text class="rel-img-more-text">+{{item._imageMore}}</text>
+              </view>
+            </view>
+          </view>
+        </view>
+
+        <!-- 日期脚标 -->
+        <view class="rel-card-footer">
+          <text class="rel-footer-text">更新于 {{item._updatedLabel}}</text>
         </view>
       </view>
-      </block>
 
       <view wx:if="{{list.length === 0 && !loading}}" class="empty-state">
         <t-icon name="heart" size="100rpx" color="#ddd" />
@@ -59,12 +95,10 @@
       </view>
     </view>
 
-
-
   </view>
 </scroll-view>
 
-<!-- 悬浮新增按钮（置于 scroll-view 外以保持 fixed 定位） -->
+<!-- 悬浮新增按钮 -->
 <view class="fab-btn" bindtap="onAdd">
   <t-icon name="add" size="48rpx" color="#fff" />
 </view>
